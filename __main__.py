@@ -9,12 +9,14 @@
 # DESCRIPTION:
 #------------------------------------------------------cf0.2@20120401
 
+print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
+
 
 import  os,sys,datetime
 from    optparse        import OptionParser
 
 from    numpy           import array, arange
-from    .gtfile          import gtFile   as gtopen
+from    gtfile          import gtFile   as gtopen
 #from    cf2.GridCoordinates.regrid  import regrid
 
 

@@ -9,20 +9,16 @@
 # DESCRIPTION:
 #------------------------------------------------------cf0.2@20120401
 
+print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
 
-import time
 import  os,sys
+from    collections                 import OrderedDict
 from    optparse                    import OptionParser
-
 
 #import  struct
 
 from    numpy                       import memmap, array, concatenate, resize, dtype
 
-try:
-    from    cf2.utils               import OrderedDict
-except:
-    from    collections             import OrderedDict
 
 from    .gtcfg                       import __gtConfig__
 from    .gtchunk                     import __gtChunk__
