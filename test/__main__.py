@@ -16,7 +16,7 @@ import  os,sys,datetime
 from    optparse        import OptionParser
 
 from    numpy           import array, arange
-from    gtfile          import gtFile   as gtopen
+from    gtool3          import gtopen
 #from    cf2.GridCoordinates.regrid  import regrid
 
 

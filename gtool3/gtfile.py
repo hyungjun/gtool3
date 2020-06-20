@@ -21,7 +21,7 @@ from    numpy                       import memmap, array, concatenate, resize, d
 
 
 from    .gtcfg                       import __gtConfig__
-from    .gtchunk                     import __gtChunk__
+from    .chunk                      import __gtChunk__
 from    .gtvar                       import __gtVar__
 from    .gthdr                       import __gtHdrFmt__
 
