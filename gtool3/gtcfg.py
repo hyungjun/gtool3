@@ -17,10 +17,12 @@ import  struct
 
 class __gtConfig__(object):
 
-    hdrsize     = 1032          # = 4+1024+4
+    hdrsize     = 1024
 
     #chksumHdr   = list( struct.pack( '>i', hdrsize-8 ) ) # w/o checksum
-    chksumHdr   = memoryview( struct.pack( '>i', hdrsize-8 ) ).cast( 'c' ).tolist() # w/o checksum
+    #chksumHdr   = memoryview( struct.pack( '>i', hdrsize ) ).cast( 'c' ).tolist() # w/o checksum
+
+
 
     version     = '0.55'
 

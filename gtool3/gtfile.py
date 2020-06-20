@@ -194,9 +194,16 @@ class gtFile( __gtHdrFmt__ ):
         return
 
 
+    @property
+    def variables( self ):
+        return getattr( self, vars )
+
 
     @property
     def vars(self):
+        '''
+        to be deprecated
+        '''
 
         if len( list(self.__vars__.keys()) ) == 0 or not hasattr( self, '__vars__' ):
 
@@ -217,17 +224,19 @@ class gtFile( __gtHdrFmt__ ):
 
 
     def get_chunksize(self, curr):
+
         if curr in list(self.__pos__.keys()):
             return self.__pos__[ curr ]
 
         else:
-            dataPos         = curr + self.hdrBytes
+            dataPos         = curr + self.hdrBytes + 8      # position of data block starts
 
             dataSize        = self.__rawArray__[dataPos: dataPos+4]
             dataSize.dtype  = '>i4'
-            dataSize        = 4+dataSize[0]+4
 
-            chunkSize       = self.hdrBytes + dataSize
+            dataSize        = dataSize[0]           # length of data block in 4-byte
+
+            chunkSize       = self.hdrBytes + 8 + dataSize + 8
 
             self.__pos__[self.curr] = self.curr+chunkSize
 
@@ -324,58 +333,58 @@ class gtFile( __gtHdrFmt__ ):
             # ------------------------------------------------------------------
 
 
-class __gtDim__(gtFile):
-    '''
-    TODO
-    i. to be integrated into class __gtHdr__
-    ii. fix a bug for reading wrong value
-    '''
-
-    def __init__(self,crdNAME):
-        '''
-        crdNAME: list of pre-defined coordination name [AITM1, AITM2, AITM3]
-        '''
-
-        AITM1, AITM2, AITM3     = crdNAME
-
-        self.__dictDim__        = OrderedDict()
-        self.__dictDim__[ 'z' ] = array( self.get_coord( AITM3 )[1].flatten() )
-        self.__dictDim__[ 'y' ] = array( self.get_coord( AITM2 )[1].flatten() )
-        self.__dictDim__[ 'x' ] = array( self.get_coord( AITM1 )[1].flatten() )
-
-        self.names  = (AITM3, AITM2, AITM1)
-
-
-    def get_coord(self,crdName):
-        srcFName    = 'GTAXLOC.%s'%crdName
-        srcPath     = os.path.join(GTOOL_DIR,srcFName)
-
-        self.curr       = 0
-        self.hdrBytes   = 1032      # = 4+1024+4
-        self.__rawArray__  = memmap(srcPath, 'S1', 'r')
-
-        Headers, Vars   = self.scan_structure()
-
-        crdName         = list(Vars.keys())[0]
-
-        return crdName, Vars[crdName][0][:]
-
-
-    def __getitem__(self,k):
-        return self.__dictDim__[k]
-
-
-    def __repr__(self):
-
-        strDim      = ['\n   ** DIMENSIONS **   ',]
-        dimFmt      = '[ %s]  %-16s :%s, (%i)'
-
-        for crdName, axName in map( None, self.names, list(self.__dictDim__.keys()) ):
-            aCrd    = self.__dictDim__[axName]
-            strDim.append( dimFmt%(axName, crdName, '[%s ... %s]'%(aCrd[0],aCrd[-1]) if aCrd != [] else '[]', len(aCrd)) )
-#            print '[%s ... %s]'%(str(aCrd[0]),str(aCrd[0])),  array([0.0])==[]
-
-        return '\n'.join(strDim)
+#class __gtDim__(gtFile):
+#    '''
+#    TODO
+#    i. to be integrated into class __gtHdr__
+#    ii. fix a bug for reading wrong value
+#    '''
+#
+#    def __init__(self,crdNAME):
+#        '''
+#        crdNAME: list of pre-defined coordination name [AITM1, AITM2, AITM3]
+#        '''
+#
+#        AITM1, AITM2, AITM3     = crdNAME
+#
+#        self.__dictDim__        = OrderedDict()
+#        self.__dictDim__[ 'z' ] = array( self.get_coord( AITM3 )[1].flatten() )
+#        self.__dictDim__[ 'y' ] = array( self.get_coord( AITM2 )[1].flatten() )
+#        self.__dictDim__[ 'x' ] = array( self.get_coord( AITM1 )[1].flatten() )
+#
+#        self.names  = (AITM3, AITM2, AITM1)
+#
+#
+#    def get_coord(self,crdName):
+#        srcFName    = 'GTAXLOC.%s'%crdName
+#        srcPath     = os.path.join(GTOOL_DIR,srcFName)
+#
+#        self.curr       = 0
+#        self.hdrBytes   = 1032      # = 4+1024+4
+#        self.__rawArray__  = memmap(srcPath, 'S1', 'r')
+#
+#        Headers, Vars   = self.scan_structure()
+#
+#        crdName         = list(Vars.keys())[0]
+#
+#        return crdName, Vars[crdName][0][:]
+#
+#
+#    def __getitem__(self,k):
+#        return self.__dictDim__[k]
+#
+#
+#    def __repr__(self):
+#
+#        strDim      = ['\n   ** DIMENSIONS **   ',]
+#        dimFmt      = '[ %s]  %-16s :%s, (%i)'
+#
+#        for crdName, axName in map( None, self.names, list(self.__dictDim__.keys()) ):
+#            aCrd    = self.__dictDim__[axName]
+#            strDim.append( dimFmt%(axName, crdName, '[%s ... %s]'%(aCrd[0],aCrd[-1]) if aCrd != [] else '[]', len(aCrd)) )
+##            print '[%s ... %s]'%(str(aCrd[0]),str(aCrd[0])),  array([0.0])==[]
+#
+#        return '\n'.join(strDim)
 
 
 

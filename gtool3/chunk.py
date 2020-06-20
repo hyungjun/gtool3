@@ -16,8 +16,8 @@ from    optparse                import OptionParser
 import  struct
 import  numpy                   as  np
 
-from    .gthdr           import __gtHdr__
-from    .gtcfg           import __gtConfig__
+from    .gthdr                  import __gtHdr__
+from    .gtcfg                  import __gtConfig__
 
 
 class __gtChunk__( __gtConfig__ ):
@@ -34,6 +34,7 @@ class __gtChunk__( __gtConfig__ ):
         kwargs  = {'header': ... }
         '''
 
+
         # encoding mode
         if 'header' in kwargs:
 
@@ -44,6 +45,8 @@ class __gtChunk__( __gtConfig__ ):
             pos             = 0
             size            = __rawArray__.size
 
+            #print( __rawArray__, type(__rawArray__), __rawArray__.dtype )
+            #sys.exit()
         # decoding mode
         else:
             __rawArray__, pos, size = args
@@ -52,7 +55,13 @@ class __gtChunk__( __gtConfig__ ):
         self.pos            = pos
         self.size           = size
 
-        self.hsize          = self.hdrsize
+        self.hdridx         = ( pos + 4, 
+                                pos + self.hdrsize + 4 )
+
+        self.datidx         = ( self.hdridx[-1] + 8,
+                                pos + self.size - 4 )
+
+        #self.hsize          = self.hdrsize
 
 
     '''
@@ -66,32 +75,57 @@ class __gtChunk__( __gtConfig__ ):
         encoding header + data chunk
         '''
 
+        data.dtype  = 'S1'
+
+        header      = np.array( list( ''.join(header) ), 'S1' ) 
+
+        hsize       = np.array( self.hdrsize.to_bytes( 4, 'big' ) ).view( '4S1' )
+        dsize       = np.array( data.size.to_bytes( 4, 'big' ) ).view( '4S1' )
+
+        chunk       = np.concatenate( [ hsize, header,    hsize, 
+                                        dsize, data.flat, dsize ] )
+
+        return chunk
+
+    '''
+    def chunking1( self, data, header ):
+
         chksumHdr   = __gtConfig__.chksumHdr
         header      = np.array( list( ''.join(header) ), 'S1' )
         #header      = ''.join(header) 
+
+        #print( header )
+
+        hr = 1024
+        print( chksumHdr, type(chksumHdr) )
+        print( hr.to_bytes(4, 'big') ) 
+
+        #chksumHdr   = memoryview( struct.pack( '>i', hdrsize ) ).cast( 'c' ).tolist() # w/o checksum
 
         data.dtype  = 'S1'
         #chksumData  = list( struct.pack( '>i', data.size ) )
         chksumData  = memoryview( struct.pack( '>i', data.size ) ).cast( 'c' ).tolist() 
 
-        print( type( chksumHdr), chksumHdr )
-        print( type( chksumData ), chksumData )
-        print( type( header ), header )
-        print( type(  data ), data )
-        print( data.size )
-
+        #print( type( chksumHdr), chksumHdr )
+        #print( type( chksumData ), chksumData )
+        #print( type( header ), header )
+        #print( type(  data ), data )
+        #print( data.size )
 
         chunk       = np.concatenate( [ chksumHdr, header, chksumHdr,
                                      chksumData, data.flat, chksumData ] )
         return chunk
+    '''
 
 
 
     @property
     def header(self):
 
-        sIdx    = self.pos + 4
-        eIdx    = self.pos + self.hsize - 4
+        #sIdx    = self.pos + 4
+        #eIdx    = self.pos + self.hsize + 4
+
+        sIdx, eIdx  = self.hdridx
 
         __header__      = self.__rawArray__[sIdx:eIdx]
 
@@ -103,15 +137,26 @@ class __gtChunk__( __gtConfig__ ):
     @property
     def data(self):
 
-        sIdx    = self.pos + self.hsize + 4
-        eIdx    = self.pos + self.size - 4
+        #sIdx    = self.pos + self.hsize + 12
+        #eIdx    = self.pos + self.size - 4
+
+        sIdx, eIdx  = self.datidx
+
         data    = self.__rawArray__[sIdx:eIdx]
 
         # NEED to consider ASTR1 :: e.g.) self.header['AEND3'] - self.header['ASTR3'] +1
+
+        shape   = ( int( self.header['AEND3'] ), 
+                    int( self.header['AEND2'] ), 
+                    int( self.header['AEND1'] ), 
+                )
+                    
+        '''
         shape       = list(map( int, [
                                  self.header['AEND3'],
                                  self.header['AEND2'],
                                  self.header['AEND1']] ))
+        '''
         # ------------------------------------------------------------------------------
 
         data.dtype  = {''   :np.dtype('>f4'),
