@@ -1,29 +1,12 @@
-#! /usr/bin/python
-#--------------------------------------------------------------------
-# PROGRAM    : gthdr.py
-# CREATED BY : hjkim @IIS.2015-07-29 11:09:16.855574
-# MODIFED BY :
-#
-# USAGE      : $ ./gthdr.py
-#
-# DESCRIPTION:
-#------------------------------------------------------cf0.2@20120401
-
-
 import  os,sys
-from    optparse        import OptionParser
-
 
 import  datetime
 
-from    numpy           import array, dtype
+from    collections         import OrderedDict
 
-try:
-    from    cf2.utils   import OrderedDict
-except:
-    from    collections import OrderedDict
+from    numpy               import array, dtype
 
-from    .config          import __gtConfig__
+from    .config             import __gtConfig__
 
 
 class __gtHdrFmt__(object):
@@ -236,12 +219,22 @@ class __gtHdr__(__gtHdrFmt__):
         # ----------------------------------------------------------------------
 
 
+    def __getattr__( self, k ):
+
+        ret     = self.__hdr__[ self.keys.index(k) ] 
+
+        if type( ret ) in [ tuple ]:
+            return [ self.fmt[ k ][0]( b.decode().strip() ) for b in ret ]
+
+        else:
+            return self.fmt[ k ][0]( ret.decode().strip() )
+
+
     def __getitem__(self,k):
         hdr     = self.__hdr__
 
         ret     = hdr[ self.keys.index(k) ] 
 
-        print(ret, type( ret) )
         if type( ret ) in [ tuple ]:
             return [ b.decode() for b in ret ]
 
@@ -304,32 +297,5 @@ class __gtHdr__(__gtHdrFmt__):
 
         return Template
     '''
-
-
-def main(args,opts):
-    print(args)
-    print(opts)
-
-    return
-
-
-if __name__=='__main__':
-    usage   = 'usage: %prog [options] arg'
-    version = '%prog 1.0'
-
-    parser  = OptionParser(usage=usage,version=version)
-
-#    parser.add_option('-r','--rescan',action='store_true',dest='rescan',
-#                      help='rescan all directory to find missing file')
-
-    (options,args)  = parser.parse_args()
-
-#    if len(args) == 0:
-#        parser.print_help()
-#    else:
-#        main(args,options)
-
-#    LOG     = LOGGER()
-    main(args,options)
 
 

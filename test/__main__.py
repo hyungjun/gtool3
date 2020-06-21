@@ -127,6 +127,17 @@ def test_varwise_decoding( srcPath, aOri ):
 
 def main(args,opts):
 
+    gt  = gtopen( './Wg' )
+
+    for g in gt: print( g )
+
+    print( gt.vars )
+    print( gt.vars['GLW'].headers )
+    
+
+    return 
+
+
     testFlag    = []        # flag for the entire test seq.
 
     outPath     = './test.gt'

@@ -11,14 +11,12 @@
 
 print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
 
-import  os,sys
-from    collections                 import OrderedDict
-from    optparse                    import OptionParser
+import  os, sys, time
+import  struct
 
-#import  struct
+from    collections                 import OrderedDict
 
 from    numpy                       import memmap, array, concatenate, resize, dtype
-
 
 from    .config                      import __gtConfig__
 from    .chunk                       import __gtChunk__
@@ -26,7 +24,7 @@ from    .gtvar                       import __gtVar__
 from    .gthdr                       import __gtHdrFmt__
 
 
-class gtFile( __gtHdrFmt__ ):
+class gtFile( __gtConfig__, __gtHdrFmt__ ):
     '''
     gt=gtool(path, iomode,unit)
 
@@ -114,11 +112,10 @@ class gtFile( __gtHdrFmt__ ):
     64 "SIZE":[int,"%16i",0]
     '''
 
-    def __init__(self, gtPath, mode='r', struct='native'):
+    def __init__(self, gtPath, mode='r', indexing=True):
         '''
-        struct  : ['simple', 'native']
-                   'simple' : uniform file structure (singel var)
-                   'native' : contains multiple vars & dims
+        indexing  <bool>    True : scan entire file (e.g., for multiple vars & dims container)
+                            False: scan first block only & uniform file structure (e.g., for ingel var container)
         '''
 
         if mode in ['r','c','r+']:
@@ -134,20 +131,25 @@ class gtFile( __gtHdrFmt__ ):
         else:
             raise ValueError('%s is not supported option'%mode)
 
-
-        self.curr       = 0
-        self.hdrBytes   = __gtConfig__.hdrsize
+        self.pos        = 0
         self.size       = self.__rawArray__.size
 
+        self.curr       = 0
+        self.__blk_idx__= []            # indices of fortran IO blocks
         self.__chunks__ = []
         self.__vars__   = OrderedDict()
 
         self.__pos__    = OrderedDict()
 
-        self.struct     = struct
+        #self.indexing     = indexing
 
-        if struct == 'simple':
-            # cache varName for simple structure
+        if indexing:
+            s=time.time()
+            self.indexing()
+            print( time.time()-s)
+
+        else:
+            # cache varName for simple indexingure
 
             self.set_uniform_pos()
 
@@ -180,20 +182,6 @@ class gtFile( __gtHdrFmt__ ):
 #        return self.__chunks__
 
 
-    def set_uniform_pos(self):
-
-        pos             = 0
-        defaultSize     = self.get_chunksize( 0 )
-
-        while pos < self.size:
-
-            self.__pos__[ pos ] = defaultSize
-
-            pos += defaultSize
-
-        return
-
-
     @property
     def variables( self ):
         return getattr( self, vars )
@@ -211,7 +199,7 @@ class gtFile( __gtHdrFmt__ ):
 
             for chunk in self:#.__chunks__:
 
-                # speed-up for 'simple' structure
+                # speed-up for 'simple' indexingure
                 varName     = chunk.header['ITEM'].strip() if not hasattr( self, 'varName' )    \
                          else self.varName
 
@@ -223,20 +211,57 @@ class gtFile( __gtHdrFmt__ ):
         return OrderedDict( [(k, __gtVar__(v) ) for k,v in list(self.__vars__.items())] )
 
 
+    def indexing( self ):
+        '''
+        '''
+
+        blk_idx = []            # indices of fortran IO blocks
+
+        pos     = 0
+
+        while pos < self.__rawArray__.size:
+
+            blk_len = int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+
+            blk_idx.append( [ pos+4, pos+4 + blk_len ] )
+
+            print( pos+4, blk_len, blk_idx[-1] )
+            pos += blk_len + 8
+
+        self.__blk_idx__    = blk_idx
+
+
+    def set_uniform_pos(self):
+
+        pos             = 0
+        defaultSize     = self.get_chunksize( 0 )
+
+        while pos < self.size:
+
+            self.__pos__[ pos ] = defaultSize
+
+            pos += defaultSize
+
+        return
+
+
     def get_chunksize(self, curr):
 
         if curr in list(self.__pos__.keys()):
             return self.__pos__[ curr ]
 
         else:
-            dataPos         = curr + self.hdrBytes + 8      # position of data block starts
+
+            dataPos         = curr + self.hdrsize + 8      # position of data block starts
 
             dataSize        = self.__rawArray__[dataPos: dataPos+4]
             dataSize.dtype  = '>i4'
 
             dataSize        = dataSize[0]           # length of data block in 4-byte
 
-            chunkSize       = self.hdrBytes + 8 + dataSize + 8
+            print( 'curr:', curr, dataSize )
+
+            chunkSize       = self.hdrsize + 8 + dataSize + 8
 
             self.__pos__[self.curr] = self.curr+chunkSize
 
@@ -247,6 +272,47 @@ class gtFile( __gtHdrFmt__ ):
         return self
 
 
+    def get_block_len( self, pos ):
+
+        return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+
+        #return pos+4, pos+4 + blk_len
+
+
+    def __next__(self):
+
+        if self.pos == self.size:
+            self.pos    = 0
+            self.curr   = 0
+            raise StopIteration
+        
+        blk_idx = []
+
+        pos     = self.pos
+
+        DFMT    = self.__rawArray__[pos+596:pos+612].tostring().strip().decode()
+
+        # header block
+        blk_idx.append( ( pos+4, self.get_block_len( pos ) ) )
+        pos += blk_idx[-1][-1] + 8      # block_length + 8
+
+        # scale block
+        if DFMT[1:3] in ['RY', 'RX']:       # [UM]R[XY]; ?RX will be deprecated
+            blk_idx.append( ( pos+4, self.get_block_len( pos ) ) )
+            pos += blk_idx[-1][-1] + 8  # block_length + 8
+
+        # data block
+        blk_idx.append( ( pos+4, self.get_block_len( pos ) ) )
+        pos += blk_idx[-1][-1] + 8      # block_length + 8
+
+        self.__blk_idx__.append( blk_idx )
+
+        self.pos    = pos
+        self.curr  += 1
+
+        return __gtChunk__( self.__rawArray__, self.__blk_idx__[-1] )
+
+    '''
     def __next__(self):
 
         if self.curr == self.size:
@@ -260,6 +326,7 @@ class gtFile( __gtHdrFmt__ ):
         self.curr += chunkSize
 
         return chunk
+    '''
 
 
     def extend(self):
@@ -360,10 +427,10 @@ class gtFile( __gtHdrFmt__ ):
 #        srcPath     = os.path.join(GTOOL_DIR,srcFName)
 #
 #        self.curr       = 0
-#        self.hdrBytes   = 1032      # = 4+1024+4
+#        self.hdrsize   = 1032      # = 4+1024+4
 #        self.__rawArray__  = memmap(srcPath, 'S1', 'r')
 #
-#        Headers, Vars   = self.scan_structure()
+#        Headers, Vars   = self.scan_indexingure()
 #
 #        crdName         = list(Vars.keys())[0]
 #
@@ -385,33 +452,5 @@ class gtFile( __gtHdrFmt__ ):
 ##            print '[%s ... %s]'%(str(aCrd[0]),str(aCrd[0])),  array([0.0])==[]
 #
 #        return '\n'.join(strDim)
-
-
-
-def main(args,opts):
-    print(args)
-    print(opts)
-
-    return
-
-
-if __name__=='__main__':
-    usage   = 'usage: %prog [options] arg'
-    version = '%prog 1.0'
-
-    parser  = OptionParser(usage=usage,version=version)
-
-#    parser.add_option('-r','--rescan',action='store_true',dest='rescan',
-#                      help='rescan all directory to find missing file')
-
-    (options,args)  = parser.parse_args()
-
-#    if len(args) == 0:
-#        parser.print_help()
-#    else:
-#        main(args,options)
-
-#    LOG     = LOGGER()
-    main(args,options)
 
 

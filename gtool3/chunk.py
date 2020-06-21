@@ -1,15 +1,3 @@
-#! /usr/bin/python
-#--------------------------------------------------------------------
-# PROGRAM    : gtchunk.py
-# CREATED BY : hjkim @IIS.2015-07-29 13:53:41.653761
-# MODIFED BY :
-#
-# USAGE      : $ ./gtchunk.py
-#
-# DESCRIPTION:
-#------------------------------------------------------cf0.2@20120401
-
-
 import  os,sys
 
 import  struct
@@ -44,17 +32,12 @@ class __gtChunk__( __gtConfig__ ):
 
         # decoding mode
         else:
-            __rawArray__, pos, size = args
+            __rawArray__, __blk_idx__   = args
 
         self.__rawArray__   = __rawArray__
-        self.pos            = pos
-        self.size           = size
+        self.__blk_idx__    = __blk_idx__
 
-        self.hdridx         = ( pos + 4, 
-                                pos + self.hdrsize + 4 )
-
-        self.datidx         = ( self.hdridx[-1] + 8,
-                                pos + self.size - 4 )
+        print( self.__blk_idx__ )
 
 
     '''
@@ -62,6 +45,61 @@ class __gtChunk__( __gtConfig__ ):
 
         return self.header.__repr__()
     '''
+
+
+    @property
+    def header(self):
+
+        sIdx, eIdx  = self.__blk_idx__[0]   # (start, length)
+        eIdx       += sIdx
+
+        __header__      = self.__rawArray__[sIdx:eIdx]
+        __header__.dtype= 'S16'
+
+        return __gtHdr__( [__header__] )
+
+
+    @property
+    def data(self):
+
+        sIdx, eIdx  = self.__blk_idx__[-1]  # (start, length)
+        eIdx       += sIdx
+
+        data    = self.__rawArray__[sIdx:eIdx]
+
+        print( data, data.dtype, data.shape )
+        print( data.view( '>H' ), data.view( '>H' ).dtype, data.view('>H').shape )
+
+        nbit    = int( self.header.DFMT[-2:] )
+        print( nbit )
+
+        sIdx, eIdx  = self.__blk_idx__[1]  # (start, length)
+        eIdx       += sIdx
+
+        data    = self.__rawArray__[sIdx:eIdx]
+        minmax  = data.view( '>d' ).reshape(-1,2) 
+
+        print( data.view( '>H' ) * minmax[0][1] ) 
+
+        sys.exit()
+
+        # NEED to consider ASTR1 :: e.g.) self.header['AEND3'] - self.header['ASTR3'] +1
+        shape   = ( int( self.header['AEND3'] ), 
+                    int( self.header['AEND2'] ), 
+                    int( self.header['AEND1'] ), 
+                )
+        # ------------------------------------------------------------------------------
+        data.dtype  = {''   :np.dtype('>f4'),
+                       'UR4':np.dtype('>f4'),
+                       'UR8':np.dtype('>f8')}[ self.header['DFMT'].strip() ]
+
+        print( data.dtype, type( self.header['DFMT'].strip() ) );sys.exit()
+
+
+        data.shape  = shape
+
+        return data
+
 
     def chunking( self, data, header ):
         '''
@@ -79,39 +117,5 @@ class __gtChunk__( __gtConfig__ ):
                                         dsize, data.flat, dsize ] )
 
         return chunk
-
-
-    @property
-    def header(self):
-
-        sIdx, eIdx  = self.hdridx
-
-        __header__      = self.__rawArray__[sIdx:eIdx]
-        __header__.dtype= 'S16'
-
-        return __gtHdr__( [__header__] )
-
-
-    @property
-    def data(self):
-
-        sIdx, eIdx  = self.datidx
-
-        data    = self.__rawArray__[sIdx:eIdx]
-
-        # NEED to consider ASTR1 :: e.g.) self.header['AEND3'] - self.header['ASTR3'] +1
-        shape   = ( int( self.header['AEND3'] ), 
-                    int( self.header['AEND2'] ), 
-                    int( self.header['AEND1'] ), 
-                )
-        # ------------------------------------------------------------------------------
-
-        data.dtype  = {''   :np.dtype('>f4'),
-                       'UR4':np.dtype('>f4'),
-                       'UR8':np.dtype('>f8')}[ self.header['DFMT'].strip() ]
-
-        data.shape  = shape
-
-        return data
 
 
