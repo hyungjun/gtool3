@@ -23,7 +23,7 @@ try:
 except:
     from    collections import OrderedDict
 
-from    .gtcfg           import __gtConfig__
+from    .config          import __gtConfig__
 
 
 class __gtHdrFmt__(object):

@@ -20,8 +20,8 @@ from    optparse                    import OptionParser
 from    numpy                       import memmap, array, concatenate, resize, dtype
 
 
-from    .gtcfg                       import __gtConfig__
-from    .chunk                      import __gtChunk__
+from    .config                      import __gtConfig__
+from    .chunk                       import __gtChunk__
 from    .gtvar                       import __gtVar__
 from    .gthdr                       import __gtHdrFmt__
 
