@@ -47,6 +47,31 @@ def unpack_bits_from32( __rawArray__, nbit ):
 
 
 def nbit_decoder( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
+
+    miss    = ( 1 << nbit ) - 1     # e.g., 65535 if nbit == 16
+    nr      = 1                     # resolution
+                                    # for URX: nr = max( miss-1, 1 ) 
+
+    #data    = unpack_bits_from32( __rawArray__, nbit ).reshape( nlayer, -1 ).astype( '>d' )
+    #print( 'data***', data.shape, data.dtype )
+
+    data    = __rawArray__.view( '>H' ).reshape( nlayer, -1 ).astype( '>d' )
+    print( 'data***', data.shape, data.dtype )
+
+
+    #print( data.view( '>H' )[4000:4100], data.view( '>H' ).dtype, data.view('>H').shape )
+
+    offset, scale   = coef.view( '>d' ).reshape(-1,2).T
+
+    scale   = scale[:,None] #/ nr
+    offset  = offset[:,None]
+
+    print( data.dtype, scale.dtype, offset.dtype )
+
+    return np.where( data != miss, data * scale + offset, missing ).astype( '>f4' )
+    
+
+def nbit_decoder2( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
     '''
     coef    <nd-array>      : <'float64'> ( nlayer, i ); i=[0, 1]; 0: min, 1:max-min 
 
@@ -62,7 +87,7 @@ def nbit_decoder( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
 
     offset, scale   = coef.view( '>d' ).reshape(-1,2).T
 
-    scale   = scale[:,None] #/ nr
+    scale   = scale[:,None] / nr
     offset  = offset[:,None]
 
     print( data.dtype, scale.dtype, offset.dtype )

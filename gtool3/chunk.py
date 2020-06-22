@@ -70,6 +70,8 @@ class __gtChunk__( __gtConfig__ ):
 
         data    = self.__rawArray__[sIdx:eIdx]
 
+        self.encdata    = data.view( '>H' )
+
         if self.header.DFMT[:3] == 'URY':
 
             nbit    = int( self.header.DFMT[-2:] )

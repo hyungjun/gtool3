@@ -19,6 +19,8 @@ from    numpy           import array, arange
 from    gtool3          import gtopen
 #from    cf2.GridCoordinates.regrid  import regrid
 
+import  numpy           as  np
+
 
 def test_chunkwise_encoding( aSrc, outPath ):
     gtOut       = gtopen( outPath, mode='w+' )
@@ -128,7 +130,19 @@ def test_varwise_decoding( srcPath, aOri ):
 def main(args,opts):
 
     gt  = gtopen( '/work/hk01/shiogama/output/ExtremeX/gt/EX-AFSF-LNG-001/y1990/ndgglw01' )
-    print( gt.vars )
+    V0  = gt.vars[ 'INPGLW01' ][:]
+
+    print( V0.dtype, V0.shape )
+
+    d1  = np.fromfile( '/data4/daisuke/work/tool/date/ExtremeX/data/MIROC_shiogama/EX-AFSF-LNG-001/y1990/ndgglw01.bin','>f4')
+    V1  = d1.reshape( 12,6,128,256 )
+
+    print( V1.dtype, V1.shape )
+
+    for v0, v1 in zip( V0, V1 ):
+        print( np.sum( (v1-v0)**2 ) )
+
+
     sys.exit()
 
     for g in gt: print( g )
