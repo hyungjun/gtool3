@@ -127,7 +127,9 @@ def test_varwise_decoding( srcPath, aOri ):
 
 def main(args,opts):
 
-    gt  = gtopen( './Wg' )
+    gt  = gtopen( '/work/hk01/shiogama/output/ExtremeX/gt/EX-AFSF-LNG-001/y1990/ndgglw01' )
+    print( gt.vars )
+    sys.exit()
 
     for g in gt: print( g )
 

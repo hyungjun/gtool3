@@ -10,7 +10,6 @@ from    .config                 import  __gtConfig__
 from    .filters.nbit_codec     import  nbit_decoder
 
 
-
 class __gtChunk__( __gtConfig__ ):
 
     def __init__(self, *args, **kwargs):

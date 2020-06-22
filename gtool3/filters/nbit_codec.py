@@ -21,7 +21,6 @@ def nbit_encoder( __rawArray__, nbit, ibit=32 ):
 
     nr      = 1 << nbit         # resolution
     miss    = nr - 1            # biggest value of nintXX (XX = nbit)
-
     
     return
 
@@ -59,12 +58,14 @@ def nbit_decoder( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
     nr      = 1                     # resolution
                                     # for URX: nr = max( miss-1, 1 ) 
 
-    data    = unpack_bits_from32( __rawArray__, nbit ).reshape( nlayer, -1 )
+    data    = unpack_bits_from32( __rawArray__, nbit ).reshape( nlayer, -1 ).astype( '>d' )
 
     offset, scale   = coef.view( '>d' ).reshape(-1,2).T
 
-    scale   = scale[:,None] / nr
+    scale   = scale[:,None] #/ nr
     offset  = offset[:,None]
+
+    print( data.dtype, scale.dtype, offset.dtype )
 
     return np.where( data != miss, data * scale + offset, missing ).astype( '>f4' )
     
