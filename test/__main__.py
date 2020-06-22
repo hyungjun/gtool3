@@ -132,7 +132,7 @@ def main(args,opts):
     for g in gt: print( g )
 
     print( gt.vars )
-    print( gt.vars['GLW'].headers )
+    print( gt.vars['GLW'].header )
     
 
     return 

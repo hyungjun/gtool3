@@ -133,6 +133,14 @@ class __gtHdr__(__gtHdrFmt__):
 
 
     @property
+    def shape( self ):
+        return ( self.AEND3 - self.ASTR3 + 1,
+                 self.AEND2 - self.ASTR2 + 1, 
+                 self.AEND1 - self.ASTR1 + 1
+                )
+
+
+    @property
     def __get_str__(self):
 
         chksumHdr   = list( struct.pack( '>i4', self.hdrBytes-8 ) ) # w/o checksum

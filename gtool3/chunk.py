@@ -3,8 +3,12 @@ import  os,sys
 import  struct
 import  numpy                   as  np
 
-from    .gthdr                  import __gtHdr__
-from    .config                 import __gtConfig__
+from    .gthdr                  import  __gtHdr__
+from    .config                 import  __gtConfig__
+
+#from    .filters.nbit_unpack      import  nbit_unpack
+from    .filters.nbit_codec     import  nbit_decoder
+
 
 
 class __gtChunk__( __gtConfig__ ):
@@ -67,36 +71,22 @@ class __gtChunk__( __gtConfig__ ):
 
         data    = self.__rawArray__[sIdx:eIdx]
 
-        print( data, data.dtype, data.shape )
-        print( data.view( '>H' ), data.view( '>H' ).dtype, data.view('>H').shape )
+        if self.header.DFMT[:3] == 'URY':
 
-        nbit    = int( self.header.DFMT[-2:] )
-        print( nbit )
+            nbit    = int( self.header.DFMT[-2:] )
 
-        sIdx, eIdx  = self.__blk_idx__[1]  # (start, length)
-        eIdx       += sIdx
+            sIdx, eIdx  = self.__blk_idx__[1]  # (start, length)
+            eIdx       += sIdx
+            coef    = self.__rawArray__[sIdx:eIdx]
 
-        data    = self.__rawArray__[sIdx:eIdx]
-        minmax  = data.view( '>d' ).reshape(-1,2) 
+            data    = nbit_decoder( data, nbit, coef, self.header.shape[0] )
 
-        print( data.view( '>H' ) * minmax[0][1] ) 
-
-        sys.exit()
-
-        # NEED to consider ASTR1 :: e.g.) self.header['AEND3'] - self.header['ASTR3'] +1
-        shape   = ( int( self.header['AEND3'] ), 
-                    int( self.header['AEND2'] ), 
-                    int( self.header['AEND1'] ), 
-                )
         # ------------------------------------------------------------------------------
-        data.dtype  = {''   :np.dtype('>f4'),
+        data.dtype  = {'URY':np.dtype('>f4'),
                        'UR4':np.dtype('>f4'),
-                       'UR8':np.dtype('>f8')}[ self.header['DFMT'].strip() ]
+                       'UR8':np.dtype('>f8')}[ self.header.DFMT[:3] ]
 
-        print( data.dtype, type( self.header['DFMT'].strip() ) );sys.exit()
-
-
-        data.shape  = shape
+        data.shape  = self.header.shape
 
         return data
 
