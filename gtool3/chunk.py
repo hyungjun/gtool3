@@ -40,7 +40,7 @@ class __gtChunk__( __gtConfig__ ):
         self.__rawArray__   = __rawArray__
         self.__blk_idx__    = __blk_idx__
 
-        print( self.__blk_idx__ )
+        #print( self.__blk_idx__ )
 
 
     '''

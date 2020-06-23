@@ -184,7 +184,7 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
 
     @property
     def variables( self ):
-        return getattr( self, vars )
+        return getattr( self, 'vars' )
 
 
     @property

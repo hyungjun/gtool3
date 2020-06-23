@@ -129,9 +129,21 @@ def test_varwise_decoding( srcPath, aOri ):
 def main(args,opts):
 
     gt  = gtopen( 'ndgglw01' )
-    V0  = gt.vars[ 'INPGLW01' ][:]
+    print( 'open file' )
 
+    print( gt.vars )
+    print( gt.variables )
+
+    V0  = gt.vars[ 'INPGLW01' ]
     print( V0.dtype, V0.shape )
+
+    print( V0.header )
+
+    #for chunk in V0:
+    #    print( chunk )
+
+
+    sys.exit()
 
     d1  = np.fromfile( 'ndgglw01.bin','>f4')
     V1  = d1.reshape( 12,6,128,256 )

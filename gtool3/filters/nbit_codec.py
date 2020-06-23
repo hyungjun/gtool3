@@ -67,7 +67,7 @@ def nbit_decoder( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
     scale   = scale[:,None] / nr
     offset  = offset[:,None]
 
-    print( data.dtype, scale.dtype, offset.dtype, (data*scale+offset).dtype )
+    #print( data.dtype, scale.dtype, offset.dtype, (data*scale+offset).dtype )
 
     return np.where( data != miss, data * scale + offset, missing ).astype( '>f4' )
     
