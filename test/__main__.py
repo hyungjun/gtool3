@@ -9,8 +9,7 @@
 # DESCRIPTION:
 #------------------------------------------------------cf0.2@20120401
 
-print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
-
+#print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
 
 import  os,sys,datetime
 from    optparse        import OptionParser
@@ -129,12 +128,12 @@ def test_varwise_decoding( srcPath, aOri ):
 
 def main(args,opts):
 
-    gt  = gtopen( '/work/hk01/shiogama/output/ExtremeX/gt/EX-AFSF-LNG-001/y1990/ndgglw01' )
+    gt  = gtopen( 'ndgglw01' )
     V0  = gt.vars[ 'INPGLW01' ][:]
 
     print( V0.dtype, V0.shape )
 
-    d1  = np.fromfile( '/data4/daisuke/work/tool/date/ExtremeX/data/MIROC_shiogama/EX-AFSF-LNG-001/y1990/ndgglw01.bin','>f4')
+    d1  = np.fromfile( 'ndgglw01.bin','>f4')
     V1  = d1.reshape( 12,6,128,256 )
 
     print( V1.dtype, V1.shape )

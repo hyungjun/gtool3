@@ -9,20 +9,21 @@ def ipack32len( nbit, datalen, ibit=32 ):
     nbit        <int>       n-bit of encoded data
     datalen     <int>       data length of input data array (default: 32-bit) 
     ibit        <int>       n-bit of input data
+
+    ---------------------------------------------------------------------------
+    * implemented for verification & not in actual use
     '''
     return nbit * datalen//ibit + (nbit * datalen%ibit + ibit-1 ) // ibit
 
 
+'''
 def nbit_encoder( __rawArray__, nbit, ibit=32 ):
-    '''
-    obit        <int>       unpact np.array (dtype=S1) to np.array (dtype=I)
-    
-    '''
 
     nr      = 1 << nbit         # resolution
     miss    = nr - 1            # biggest value of nintXX (XX = nbit)
     
     return
+'''
 
 
 def unpack_bits_from32( __rawArray__, nbit ):
@@ -47,31 +48,6 @@ def unpack_bits_from32( __rawArray__, nbit ):
 
 
 def nbit_decoder( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
-
-    miss    = ( 1 << nbit ) - 1     # e.g., 65535 if nbit == 16
-    nr      = 1                     # resolution
-                                    # for URX: nr = max( miss-1, 1 ) 
-
-    #data    = unpack_bits_from32( __rawArray__, nbit ).reshape( nlayer, -1 ).astype( '>d' )
-    #print( 'data***', data.shape, data.dtype )
-
-    data    = __rawArray__.view( '>H' ).reshape( nlayer, -1 ).astype( '>d' )
-    print( 'data***', data.shape, data.dtype )
-
-
-    #print( data.view( '>H' )[4000:4100], data.view( '>H' ).dtype, data.view('>H').shape )
-
-    offset, scale   = coef.view( '>d' ).reshape(-1,2).T
-
-    scale   = scale[:,None] #/ nr
-    offset  = offset[:,None]
-
-    print( data.dtype, scale.dtype, offset.dtype )
-
-    return np.where( data != miss, data * scale + offset, missing ).astype( '>f4' )
-    
-
-def nbit_decoder2( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
     '''
     coef    <nd-array>      : <'float64'> ( nlayer, i ); i=[0, 1]; 0: min, 1:max-min 
 
@@ -83,14 +59,15 @@ def nbit_decoder2( __rawArray__, nbit, coef, nlayer, missing=1E20 ):
     nr      = 1                     # resolution
                                     # for URX: nr = max( miss-1, 1 ) 
 
-    data    = unpack_bits_from32( __rawArray__, nbit ).reshape( nlayer, -1 ).astype( '>d' )
+    data    = unpack_bits_from32( __rawArray__, nbit ).reshape( nlayer, -1 )#.astype( '>d' )
+    #data    = __rawArray__.view( '>H' ).reshape( nlayer, -1 )#.astype( '>d' )
 
     offset, scale   = coef.view( '>d' ).reshape(-1,2).T
 
     scale   = scale[:,None] / nr
     offset  = offset[:,None]
 
-    print( data.dtype, scale.dtype, offset.dtype )
+    print( data.dtype, scale.dtype, offset.dtype, (data*scale+offset).dtype )
 
     return np.where( data != miss, data * scale + offset, missing ).astype( '>f4' )
     

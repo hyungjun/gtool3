@@ -9,8 +9,6 @@
 # DESCRIPTION:
 #------------------------------------------------------cf0.2@20120401
 
-print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
-
 import  os, sys, time
 import  struct
 
@@ -143,6 +141,7 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
 
         #self.indexing     = indexing
 
+        '''
         if indexing:
             s=time.time()
             self.indexing()
@@ -155,6 +154,7 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
 
             size            = self.__pos__[0]
             self.varName    = __gtChunk__( self.__rawArray__, 0, size ).header['ITEM'].strip()
+        '''
 
 
         self.iomode     = mode
@@ -231,6 +231,7 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
         self.__blk_idx__    = blk_idx
 
 
+    '''
     def set_uniform_pos(self):
 
         pos             = 0
@@ -266,6 +267,7 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
             self.__pos__[self.curr] = self.curr+chunkSize
 
             return chunkSize
+    '''
 
 
     def __iter__(self):
