@@ -49,26 +49,38 @@ class __gtChunk__( __gtConfig__ ):
         return self.header.__repr__()
     '''
 
+    @property
+    def __header__( self ):
+        sIdx, eIdx  = self.__blk_idx__[0]   # (start, length)
+        eIdx       += sIdx
+
+        return self.__rawArray__[sIdx:eIdx]
+ 
+
+    @property
+    def __data__( self ):
+        sIdx, eIdx  = self.__blk_idx__[-1]   # (start, length)
+        eIdx       += sIdx
+
+        return self.__rawArray__[sIdx:eIdx]
+
 
     @property
     def header(self):
 
-        sIdx, eIdx  = self.__blk_idx__[0]   # (start, length)
-        eIdx       += sIdx
+        return __gtHdr__( self.__header__[None,:] )
 
-        __header__      = self.__rawArray__[sIdx:eIdx]
-        __header__.dtype= 'S16'
+        '''
+        __header__      = self.__rawArray__[sIdx:eIdx].view( 'S16' ).astype( 'U16' )
 
-        return __gtHdr__( [__header__] )
+        return __gtHdr__( __header__[None,:] )
+        '''
 
 
     @property
     def data(self):
 
-        sIdx, eIdx  = self.__blk_idx__[-1]  # (start, length)
-        eIdx       += sIdx
-
-        data    = self.__rawArray__[sIdx:eIdx]
+        data    = self.__data__
 
         self.encdata    = data.view( '>H' )
 

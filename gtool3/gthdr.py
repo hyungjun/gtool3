@@ -4,7 +4,7 @@ import  datetime
 
 from    collections         import OrderedDict
 
-from    numpy               import array, dtype
+from    numpy               import array, dtype, unique
 
 from    .config             import __gtConfig__
 
@@ -116,20 +116,40 @@ class __gtHdr__(__gtHdrFmt__):
 
     def __init__(self, headers=None, **kwargs):
         '''
-        headers : <list> : __memmap__<S16>
+        headers     <nd-array>      header array [ (n, 64, 16), 'U16' ]
         '''
 
+        self.keys           = list( self.fmt.keys() )
+
         # when header == None (e.g., newly generated gtfile) -------------------
-        if headers == None or kwargs != {}:
+        if headers is None or kwargs != {}:
 
             self.__headers__    = self.auto_fill( headers, **kwargs )
         # ----------------------------------------------------------------------
 
         else:
-            self.__headers__    = headers
+            self.__headers__    = headers#.view( 'S16' ).astype( 'U16' )
             #self.__headers__    = headers    if type( headers ) == list   else [ headers ]
 
-        self.keys           = list(self.fmt.keys())
+        print( self.__headers__.shape )
+        self.asdict
+        #print( self.asdict.shape, self.asdict.base.shape )
+        print( 'base', self.__headers__.base.shape, self.__headers__.shape );sys.exit()
+
+
+    @property
+    def asdict( self ):
+
+        headers = self.__headers__.view( 'S16' )
+
+        if headers.shape[0] == 1:
+            print( OrderedDict( zip( self.keys, headers[0].astype( 'U16'  ) )
+
+        else:
+            for i, k in enumerate( self.keys ):
+                print( (k, unique( headers[:,i] ) ) )
+
+        return headers
 
 
     @property
@@ -140,6 +160,7 @@ class __gtHdr__(__gtHdrFmt__):
                 )
 
 
+    '''
     @property
     def __get_str__(self):
 
@@ -149,8 +170,9 @@ class __gtHdr__(__gtHdrFmt__):
         [ list( ''.join( __header__ ) ) for __header__ in self.__headers__]
 
         return
+    '''
 
-
+    '''
     @property
     def __hdr__(self):
 
@@ -160,6 +182,7 @@ class __gtHdr__(__gtHdrFmt__):
                                     for attr in zip(*self.__headers__) ]
 
         return __hdr__
+    '''
 
 
     def template(self, **kwargs):
@@ -170,6 +193,9 @@ class __gtHdr__(__gtHdrFmt__):
 
     def __repr__(self):
         hdr         = self.__hdr__
+
+        print( hdr, hdr[0].dtype, hdr[0].shape )
+        sys.exit()
 
         nCol        = 3
 
@@ -227,36 +253,57 @@ class __gtHdr__(__gtHdrFmt__):
         # ----------------------------------------------------------------------
 
 
+    '''
     def __getattr__( self, k ):
 
+        ret     = self.__headers__[ :, self.keys.index(k) ]
+
+        return   self.fmt[ k ][0]( ret[0].strip() ) if unique( ret ).size == 1  \
+          else [ self.fmt[ k ][0]( s.strip() ) for s in ret ]
+    '''
+    '''
         ret     = self.__hdr__[ self.keys.index(k) ] 
 
         if type( ret ) in [ tuple ]:
-            return [ self.fmt[ k ][0]( b.decode().strip() ) for b in ret ]
+            return [ self.fmt[ k ][0]( b.strip() ) for b in ret ]
+            #return [ self.fmt[ k ][0]( b.decode().strip() ) for b in ret ]
 
         else:
-            return self.fmt[ k ][0]( ret.decode().strip() )
+            #return self.fmt[ k ][0]( ret.decode().strip() )
+            return self.fmt[ k ][0]( ret.strip() )
+    '''
 
 
     def __getitem__(self,k):
+
+        ret     = self.__headers__[ :, self.keys.index(k) ]
+
+        return ret[0] if unique( ret ).size == 1     \
+          else ret
+
+
+        '''
         hdr     = self.__hdr__
 
         ret     = hdr[ self.keys.index(k) ] 
 
         if type( ret ) in [ tuple ]:
-            return [ b.decode() for b in ret ]
+            return [ b for b in ret ]
+            #return [ b.decode() for b in ret ]
 
         else:
-            return ret.decode()
+            return ret
+            #return ret.decode()
 
 
         #return hdr[ self.keys.index(k) ].decode()
+        '''
 
 
     def __setitem__(self, k, v):
 
         fn, fmt, default    = self.fmt[k]
-        idx                 = list(self.fmt.keys()).index(k)
+        idx                 = list(self.keys()).index(k)
 
         if not hasattr(v, '__iter__') or type( v ) == str:
             v   = [v] * len( self.__headers__)
@@ -268,9 +315,19 @@ class __gtHdr__(__gtHdrFmt__):
                               fmt%fn( v )
 
 
-#        print self.__headers__
-#        print type( self.__headers__ )
-#        print v, type(v), len(v), len( fmt%v )
+
+    def todict( self, headers ):
+        '''
+        headers     <nd-array>      headers in nd-array [ (n, 1024), 'S1' ]
+
+        return
+        ======
+        outdict     <OrderedDict>   headers
+        '''
+
+        outdict     = ( () )
+
+        return
 
 
 

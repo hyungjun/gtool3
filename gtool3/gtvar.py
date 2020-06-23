@@ -1,6 +1,7 @@
 import  os,sys
 
-from    numpy               import arange, array, empty
+#from    numpy               import array, empty
+import  numpy               as  np
 
 from    .gthdr              import __gtHdr__
 from    functools           import reduce
@@ -10,7 +11,7 @@ class __gtVar__( object ):
 
     def __init__(self, chunks ):
 
-        self.chunks     = array( chunks )
+        self.chunks     = np.array( chunks )
 
         self.item       = chunks[0].header['ITEM'].strip()
         self.shape      = [len(chunks)] + list(self.chunks[0].data.shape)
@@ -35,13 +36,13 @@ class __gtVar__( object ):
         if type( Slice[0] ) == slice:
             outShp  = [ len(chunks) ] + outShp
 
-            aOut    = empty( outShp, self.dtype )
+            aOut    = np.empty( outShp, self.dtype )
 
             for i,c in enumerate(chunks):
                 aOut[i] = c.data[ Slice[1:] ]
 
         else:
-            aOut    = empty( outShp, self.dtype )
+            aOut    = np.empty( outShp, self.dtype )
             aOut[:] = chunks[0].data[ Slice[1:] ]
 
         #aOut    = array([ c.data[ Slice[1:] ] for c in self.chunks[Slice[0]] ])
@@ -95,7 +96,7 @@ class __gtVar__( object ):
     def header(self):
         headers     = [chunk.header.__headers__[0] for chunk in self.chunks]
 
-        return __gtHdr__( headers )
+        return __gtHdr__( np.array( headers ) )
 
 
     @property
