@@ -119,8 +119,6 @@ class __gtHdr__(__gtHdrFmt__):
         headers     <nd-array>      header array [ (n, 64, 16), 'U16' ]
         '''
 
-        self.keys           = list( self.fmt.keys() )
-
         # when header == None (e.g., newly generated gtfile) -------------------
         if headers is None or kwargs != {}:
 
@@ -131,32 +129,20 @@ class __gtHdr__(__gtHdrFmt__):
             self.__headers__    = headers#.view( 'S16' ).astype( 'U16' )
             #self.__headers__    = headers    if type( headers ) == list   else [ headers ]
 
-        print( self.__headers__.shape )
-        self.asdict
-        #print( self.asdict.shape, self.asdict.base.shape )
-        print( 'base', self.__headers__.base.shape, self.__headers__.shape );sys.exit()
+        self.keys           = list( self.fmt.keys() )
 
+        print( self.shape )
 
     @property
     def asdict( self ):
-
-        headers = self.__headers__.view( 'S16' )
-
-        if headers.shape[0] == 1:
-            print( OrderedDict( zip( self.keys, headers[0].astype( 'U16'  ) )
-
-        else:
-            for i, k in enumerate( self.keys ):
-                print( (k, unique( headers[:,i] ) ) )
-
-        return headers
+        return OrderedDict( zip( self.keys, self.__headers__.view('S16').swapaxes(0,1) ) )
 
 
     @property
     def shape( self ):
-        return ( self.AEND3 - self.ASTR3 + 1,
-                 self.AEND2 - self.ASTR2 + 1, 
-                 self.AEND1 - self.ASTR1 + 1
+        return ( self[ 'AEND3' ] - self[ 'ASTR3' ] + 1,
+                 self[ 'AEND2' ] - self[ 'ASTR2' ] + 1, 
+                 self[ 'AEND1' ] - self[ 'ASTR1' ] + 1
                 )
 
 
@@ -276,9 +262,18 @@ class __gtHdr__(__gtHdrFmt__):
 
     def __getitem__(self,k):
 
-        ret     = self.__headers__[ :, self.keys.index(k) ]
+        ret     = self.asdict[ k ]
 
-        return ret[0] if unique( ret ).size == 1     \
+        if ret.shape[0] == 1:
+            print( '***', self.fmt[ k ][0]( ret[0].astype('U16') ) )
+            print( '   ', type( self.fmt[ k ][0]( ret[0].astype('U16') ) ) )
+            return self.fmt[ k ][0]( ret[0] ) 
+
+        sys.exit()
+        print(k, ret, type(ret))
+        return ret
+
+        return ret[0].strip() if unique( ret ).size == 1     \
           else ret
 
 

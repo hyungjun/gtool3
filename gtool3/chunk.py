@@ -84,9 +84,9 @@ class __gtChunk__( __gtConfig__ ):
 
         self.encdata    = data.view( '>H' )
 
-        if self.header.DFMT[:3] == 'URY':
+        if self.header['DFMT'][:3] == 'URY':
 
-            nbit    = int( self.header.DFMT[-2:] )
+            nbit    = int( self.header['DFMT'][-2:] )
 
             sIdx, eIdx  = self.__blk_idx__[1]  # (start, length)
             eIdx       += sIdx
