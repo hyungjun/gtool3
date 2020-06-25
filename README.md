@@ -9,18 +9,18 @@ Installation
 $ python setup.py install
 ```
 ### Dependency
-python 2.x(?) or later
+python 3.x(?) or later
 numpy 1.x(?)
 
 Chunk-wise Access
 -----------------
 ### Read .gt file
 ```python
-In [1]: from gtool import gtopen
+In [1]: from gtool3 import gtopen
 
 In [2]: gtfile=gtopen('runoff')
 
-In [3]: for i, chunk in enumerate( gtfile ): print '%3i'%i, chunk.data.shape, chunk.header['DATE']
+In [3]: for i, chunk in enumerate( gtfile ): print( '%3i'%i, chunk.data.shape, chunk.header['DATE'] )
   0 (1, 2, 360, 720) 20000101 120000
   1 (1, 2, 360, 720) 20000102 120000
   2 (1, 2, 360, 720) 20000103 120000
@@ -108,20 +108,22 @@ Out[6]:
 
 Features
 --------
-read/write float32 and float64
+* read/write float32 and float64
+* support URYnn decoding (n-bit compression)
 
 
 ToDo
 ----
-delayed evaluation
-support float16
-support mask
-add utils such as gtshow
+* delayed evaluation
+* support float16
+* support mask
+* add utils such as gtshow
 
 
 History
 -------
-2015-11-10    First internal release
-2015-11-17    version 0.55 /* delayed evaluation, debug many */
+* 2020-06-26    version 0.6a Python3 support
+* 2015-11-17    version 0.55 /* delayed evaluation, debug many */
+* 2015-11-10    First internal release
 
 
