@@ -19,7 +19,7 @@ class __gtVar__( object ):
         self.shape      = tuple( [len(chunks)] + list(__hdr0__.shape) )
         self.dtype      = chunks[0].data.dtype      # future performance boost
 
-        self.chunks     = np.array( chunks )
+        self.chunks     = chunks
 
 
     def __repr__(self):
@@ -36,9 +36,8 @@ class __gtVar__( object ):
             k0      = k
             slc     = slice( None )
 
-
         if   type( k0 ) is int:
-            return self.chunks[ k ].data[ slc ]
+            return self.chunks[ k0 ].data[ slc ]
 
         elif type( k0 ) is list:
             return np.array( [ self.chunks[i].data[ slc ] for i in k0 ] )
@@ -49,19 +48,34 @@ class __gtVar__( object ):
 
     def __setitem__(self, k, v):
 
-        Slice   = self.parse_slice( k )
+        if type( k ) is tuple:
+            k0      = k[0]
+            slc     = k[1:]
+
+        else:
+            k0      = k
+            slc     = slice( None )
 
         # assign to self.chunks ------------------------------------------------
-        chunks  = self.chunks[Slice[0]]
+        if   type( k0 ) is int:
+            self.chunks[ k0 ].data[ slc ]    = v
 
-        for i,c in enumerate(chunks):
+        elif type( k0 ) is list:
+            if not hasattr( v, '__iter__' ) or v.size == 1:
+                v   = [ v ] * len( self.chunks )
 
-            if hasattr( v, '__iter__' ):    v = v[0]
+            for i in k0:    
+                self.chunks[i].data[ slc ]  = v[i] 
 
-            c.data [Slice[1:]] = v
+        else:
+            if not hasattr( v, '__iter__' ) or v.size == 1:
+                v   = [ v ] * len( self.chunks )
+
+            for i, c in enumerate( self.chunks[ k0 ] ):
+                c.data[ slc ]   = v[i]
         # ----------------------------------------------------------------------
 
-
+    '''
     def parse_slice(self, k):
         # parse slice ----------------------------------------------------------
         if not hasattr(k, '__iter__'):  k = [k]
@@ -86,14 +100,15 @@ class __gtVar__( object ):
         # ----------------------------------------------------------------------
 
         return tuple( Slice )
+    '''
 
 
     @property
     def header(self):
 
-        headers     = [chunk.__header__ for chunk in self.chunks]
+        headers     = [ chunk.__header__ for chunk in self.chunks ]
 
-        return __gtHdr__( np.array( headers ) )
+        return __gtHdr__( headers )
 
 
     @property

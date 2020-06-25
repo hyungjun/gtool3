@@ -265,15 +265,15 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
     '''
 
 
-    def __iter__(self):
-        return self
-
-
     def get_block_len( self, pos ):
 
         return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
 
         #return pos+4, pos+4 + blk_len
+
+
+    def __iter__(self):
+        return self
 
 
     def __next__(self):
@@ -342,6 +342,7 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
         ==
         Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
         header  <__gtHdr__> gtool3 header instance
+                <memmap>
 
         kwargs  <dict>      attributes to override default or given header template
 
@@ -350,13 +351,6 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
         header  <__gtHdr__>
         '''
 
-        header          = __gtHdr__()
-        print( header )
-        sys.exit()
-
-        headers             = self.auto_fill( data, **kwargs )
-        print( headers )
-        sys.exit()
 
         if headers == None:
             native_code = sys.byteorder == 'little' and '<' or '>'
@@ -371,21 +365,8 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
             dtypedescr  = byteorder + Data.dtype.kind + str(Data.dtype.itemsize)
             Data.dtype  = dtypedescr
 
-            dfmt        = self.dictDFMT[ Data.dtype ]
 
-            aend3, aend2, aend1  = Data.shape
-
-            kwargs[ 'AEND1' ]   = aend1,
-            kwargs[ 'AEND2' ]   = aend2,
-            kwargs[ 'AEND3' ]   = aend3,
-            kwargs[ 'DFMT'  ]   = dfmt,
-            kwargs[ 'SIZE'  ]   = aend1*aend2*aend3,
-
-
-        headers             = self.auto_fill( headers=headers, **kwargs )
-
-        print( headers )
-        sys.exit()
+        headers         = __gtHdr__( headers = headers ).auto_fill( Data, **kwargs )
 
 
         #for data, header in map(None, Data, headers):
@@ -394,7 +375,10 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
             chunk       = __gtChunk__( data, header=header )
             self.__chunks__.append( chunk )
 
-            varName     = header[2].strip()
+            varName     = header['ITEM']
+
+            if not hasattr( self, '__vars__' ):
+                self.__vars__           = OrderedDict()
 
             if not varName in self.__vars__:
                 self.__vars__[varName] = []

@@ -4,170 +4,48 @@ import  datetime
 
 from    collections         import OrderedDict
 
-from    numpy               import array, dtype, unique
+import  numpy               as  np
 
 from    .config             import __gtConfig__
+from    .format             import __gtHdrFmt__
 
 
-class __gtHdrFmt__(object):
-    b2s = bytes.decode
-    fmt = OrderedDict([
-("IDFM", [int,"%16i",9010]),     ("DSET",  [b2s,"%-16s",'']),      ("ITEM", [b2s,"%-16s",'']),      #00
-("EDIT1",[b2s,"%-16s",'']),      ("EDIT2", [b2s,"%-16s",'']),      ("EDIT3",[b2s,"%-16s",'']),      #03
-("EDIT4",[b2s,"%-16s",'']),      ("EDIT5", [b2s,"%-16s",'']),      ("EDIT6",[b2s,"%-16s",'']),      #06
-("EDIT7",[b2s,"%-16s",'']),      ("EDIT8", [b2s,"%-16s",'']),      ("FNUM", [int,"%16i",1]),        #09
-("DNUM", [int,"%16i",1]),        ("TITL1", [b2s,"%-16s",'']),      ("TITL2",[b2s,"%-16s",'']),      #12
-("UNIT", [b2s,"%-16s",'']),      ("ETTL1", [b2s,"%-16s",'']),      ("ETTL2",[b2s,"%-16s",'']),      #15
-("ETTL3",[b2s,"%-16s",'']),      ("ETTL4", [b2s,"%-16s",'']),      ("ETTL5",[b2s,"%-16s",'']),      #18
-("ETTL6",[b2s,"%-16s",'']),      ("ETTL7", [b2s,"%-16s",'']),      ("ETTL8",[b2s,"%-16s",'']),      #21
-("TIME", [int,"%16i",0]),        ("UTIM",  [b2s,"%-16s",'HOUR']),  ("DATE", [b2s,"%-16s",'00000000 000000']),#24
-("TDUR", [int,"%16i",0]),        ("AITM1", [b2s,"%-16s",'']),      ("ASTR1",[int,"%16i",1]),        #27
-("AEND1",[int,"%16i",0]),        ("AITM2", [b2s,"%-16s",'']),      ("ASTR2",[int,"%16i",1]),        #30
-("AEND2",[int,"%16i",0]),        ("AITM3", [b2s,"%-16s",'']),      ("ASTR3",[int,"%16i",1]),        #33
-("AEND3",[int,"%16i",0]),        ("DFMT",  [b2s,"%-16s",'UR4']),   ("MISS", [float,"%16.7e",-999.]),#36
-("DMIN", [float,"%16.7e",-999.]),("DMAX",  [float,"%16.7e",-999.]),("DIVS", [float,"%16.7e",-999.]),#39
-("DIVL", [float,"%16.7e",-999.]),("STYP",  [int,"%16i",1]),        ("COPTN",[b2s,"%-16s",'']),      #42
-("IOPTN",[int,"%16i",0]),        ("ROPTN", [float,"%16.7e",0.]),   ("DATE1",[b2s,"%-16s",'']),      #45
-("DATE2",[b2s,"%-16s",'']),      ("MEMO1", [b2s,"%-16s",'']),      ("MEMO2",[b2s,"%-16s",'']),      #48
-("MEMO3",[b2s,"%-16s",'']),      ("MEMO4", [b2s,"%-16s",'']),      ("MEMO5",[b2s,"%-16s",'']),      #51
-("MEMO6",[b2s,"%-16s",'']),      ("MEMO7", [b2s,"%-16s",'']),      ("MEMO8",[b2s,"%-16s",'']),      #54
-("MEMO9",[b2s,"%-16s",'']),      ("MEMO10",[b2s,"%-16s",'']),      ("CDATE",[b2s,"%-16s",'']),      #57
-("CSIGN",[b2s,"%-16s",'']),      ("MDATE", [b2s,"%-16s",'']),      ("MSIGN",[b2s,"%-16s",'']),      #60
-("SIZE", [int,"%16i",0])                                                                            #63
-    ])
-
-    dictDFMT    = {'UR4':'>f4', dtype('>f4'):'UR4',
-                   'UR8':'>f8', dtype('>f8'):'UR8',
-                         }
-
-    dictUTIM    = {'HOUR':datetime.timedelta(seconds=3600),
-                   'SEC':datetime.timedelta(seconds=1),
-                        }
-
-    '''
-    def __init__(self,header=None):
-        if header != None:
-            for (k,v),hdr in map(None,list(self.fmt.items()),header):
-                self.__dict__[k]    = v[0](hdr.strip())
-
-            self.dtype  = self.dictDFMT[self.DFMT]
-            self.delT   = self.dictUTIM[self.UTIM] * self.TDUR
-            self.dtime  = datetime.datetime.strptime(self.DATE,'%Y%m%d %H%M%S')
-    '''
-
-
-    def cast( self, k, values ):
-
-        if len( values ) == 1:
-            return self.fmt[ k ][0]( values[0].strip() )
-
-        else:
-            return list( self.fmt[ k ][0]( b.strip() ) for b in unique( values ) )
-
-
-    '''
-    def gen_header( self, header=None, **kwargs ):
-
-        header  = [ v[1]%( v[2] if k not in kwargs else
-                    v[0]( kwargs[k] )
-                         )
-                                    for k,v in list(self.fmt.items()) ]
-
-        return header
-    '''
-
-    @property
-    def default_dict( self ):
-        return OrderedDict( [ ( k, v[1]%v[2] ) for k,v in list(self.fmt.items()) ] )
-
-
-    def auto_fill( self, data, header=None, **kwargs ):
-        '''
-        generate header
-
-        IN
-        ==
-        Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
-        header  <__gtHdr__> gtool3 header instance
-
-        kwargs  <dict>      attributes to override default or given header template
-
-        OUT
-        ===
-        header  <__gtHdr__>
-        '''
-
-
-        keys    = list(self.fmt.keys())
-
-        if headers == None:
-
-            header  = [ ( v[1]%v[2], ) for k,v in list(self.fmt.items()) ]
-
-            # for self.iomode == 'w+':
-            kwargs[ "CSIGN" ]   = 'cf.io.gtool %s'%__gtConfig__.version
-            kwargs[ "CDATE" ]   = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
-            # ------------------------
-        else:
-
-            header  = list(zip(*headers))
-
-            # for self.iomode == 'r+':
-            kwargs[ "MSIGN" ]   = 'cf.io.gtool %s'%__gtConfig__.version
-            kwargs[ "MDATE" ]   = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
-            # ------------------------
-
-
-        for k,v in list(kwargs.items()):
-
-            cast, fmt, default  = self.fmt[k]
-
-            V   = (v, ) if not type(v) in [list, tuple] else v
-
-            header[ keys.index(k) ] =  [ fmt%( cast(v) ) for v in V ]
-
-
-        nMax    = max( [len(h) for h in header] )
-
-        header  = [ h if len(h) == nMax else h*nMax
-                            for h in header ]
-
-
-    '''
-    def str2dict(self,header):
-        return OrderedDict( ( k, v[0](hdr.strip()) ) for (k,v),hdr in map(None,self.fmt.items(),header) )
-    '''
-
-
-class __gtHdr__(__gtHdrFmt__):
+class __gtHdr__( __gtHdrFmt__ ):
 
     def __init__(self, headers=None, **kwargs):
         '''
-        headers     <memmap>      header array in 1024 bytes length
+        headers     None            for new __gtHdr__ instance
+                    <memmap>        header array in 1024 bytes length
+                    <__gtHdr__>     inherit given __gtHdr__
+
+        kwargs      <dict>          attributes to override default or given __gtHdr__
         '''
 
+        self.keys   = list( self.fmt.keys() )
+
         # when header == None (e.g., newly generated gtfile) -------------------
-        if headers is None or kwargs != {}:
+        # for self.iomode == 'w+':
+        if headers is None or isinstance( headers, __gtHdr__ ):
 
-            def_dict            = self.default_dict
+            self.dict   = self.default_dict.copy() if headers is None  \
+                     else headers.dict.copy()
 
-            self.__headers__    = array( str.encode( ''.join( v for k,v in def_dict.items() ) )).view('1024S1')
+            kwargs[ "CSIGN" ]   = 'cf.io.gtool %s'%__gtConfig__.version
+            kwargs[ "CDATE" ]   = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
 
+            self.dict.update( kwargs )
 
-            #self.__headers__    = self.auto_fill( headers, **kwargs )
+            self.__headers__    = self.asarray
         # ----------------------------------------------------------------------
 
         else:
-            self.__headers__    = headers#.view( 'S16' ).astype( 'U16' )
-            #self.__headers__    = headers    if type( headers ) == list   else [ headers ]
-        
-        self.keys   = list( self.fmt.keys() )
+            self.__headers__    = headers
 
-        self.dict   = OrderedDict( 
-                            ( k, self.cast( k, v ) ) for k, v in self.asdict.items()
-                    )
-        print( self.asdict )
+            self.dict   = OrderedDict( 
+                                ( k, self.cast( k, v ) ) for k, v in self.asdict.items()
+                        )
 
+        self.curr   = 0
 
 
     def __getitem__(self,k):
@@ -179,15 +57,32 @@ class __gtHdr__(__gtHdrFmt__):
             return self.fmt[ k ][0]( ret[0].strip() ) 
 
         else:
-            ret = list( self.fmt[ k ][0]( b.strip() ) for b in unique( ret ) )
+            ret = list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( ret ) )
 
             return ret  if len( ret ) > 1   \
               else ret[0]
 
 
+    def __len__( self ):
+        return self.__headers__.shape[0]
+
+
+    @property
+    def asarray( self ):
+
+        maxlen  = max( [ 1        if type( v ) is not list 
+                    else len( v ) for k,v in self.dict.items() ] )
+
+        bytearr = np.array( list( [ str.encode( v[1]%self.dict[k] ) ] * maxlen 
+                                                        for k,v in self.fmt.items() )
+                    ).T
+
+        return bytearr.flatten().view('S1').reshape(maxlen,1024)
+
+
     @property
     def asdict( self ):
-        return OrderedDict( zip( self.keys, self.__headers__.view('S16').swapaxes(0,1) ) )
+        return OrderedDict( zip( self.keys, np.array( self.__headers__ ).view('S16').swapaxes(0,1) ) )
 
 
     @property
@@ -233,7 +128,7 @@ class __gtHdr__(__gtHdrFmt__):
 
         hdict       = self.dict     # headers <OrderedDict>
 
-        put2note    = [ k for k, v in hdict.items() if len( unique( v ) ) > 1 ]
+        put2note    = [ k for k, v in hdict.items() if len( np.unique( v ) ) > 1 ]
 
         #print( self.__headers__.shape)
         #print( hdict )
@@ -280,7 +175,7 @@ class __gtHdr__(__gtHdrFmt__):
 
         ret     = self.__headers__[ :, self.keys.index(k) ]
 
-        return   self.fmt[ k ][0]( ret[0].strip() ) if unique( ret ).size == 1  \
+        return   self.fmt[ k ][0]( ret[0].strip() ) if np.unique( ret ).size == 1  \
           else [ self.fmt[ k ][0]( s.strip() ) for s in ret ]
     '''
     '''
@@ -304,7 +199,7 @@ class __gtHdr__(__gtHdrFmt__):
             return self.fmt[ k ][0]( ret[0].strip() ) 
 
         else:
-            ret = list( self.fmt[ k ][0]( b.strip() ) for b in unique( ret ) )
+            ret = list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( ret ) )
 
             return ret  if len( ret ) > 1   \
               else ret[0]
@@ -313,24 +208,32 @@ class __gtHdr__(__gtHdrFmt__):
     def __setitem__(self, k, v):
 
         fn, fmt, default    = self.fmt[k]
-        idx                 = list(self.keys()).index(k)
+        idx                 = self.keys.index(k)
 
         if not hasattr(v, '__iter__') or type( v ) == str:
             v   = [v] * len( self.__headers__)
 
 
-        #for __header__, v in map(None, self.__headers__, v):
         for __header__, v in zip( self.__headers__, v ):
-            __header__[idx] = v if type(v) == str and len( v ) == 16 else \
-                              fmt%fn( v )
+            __header__.view('S16')[idx] = fmt%v
 
 
-    def toarray( self ):
-        return np.array( ''.join( v for k,v in self.dict.items() ), 'S1024' )
+    def __iter__(self):
+        return self
 
 
+    def __next__(self):
 
+        if self.curr == len( self ):
+            self.curr   = 0
+            raise StopIteration
 
+        header      = __gtHdr__( self.__headers__[ self.curr ][None,:] )
+
+        self.curr  += 1
+
+        return header
+        
 
     '''
     def __setitem__(self,k,v):
@@ -363,5 +266,43 @@ class __gtHdr__(__gtHdrFmt__):
 
         return Template
     '''
+
+    def auto_fill( self, data, header=None, **kwargs ):
+        '''
+        generate header
+
+        IN
+        ==
+        Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
+        header  <__gtHdr__> gtool3 header instance to inherit
+
+        kwargs  <dict>      attributes to override default or given header template
+
+        OUT
+        ===
+        header  <__gtHdr__>
+        '''
+
+        if header is not None:
+
+            # for self.iomode == 'r+':
+            kwargs[ "MSIGN" ]   = 'cf.io.gtool %s'%__gtConfig__.version
+            kwargs[ "MDATE" ]   = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
+            # ------------------------
+
+        zsize, ysize, xsize = data.shape[-3:]
+
+        kwargs[ 'AEND1' ]   = self['ASTR1'] + xsize - 1
+        kwargs[ 'AEND2' ]   = self['ASTR2'] + ysize - 1
+        kwargs[ 'AEND3' ]   = self['ASTR3'] + zsize - 1
+        kwargs[ 'SIZE'  ]   = zsize * ysize * xsize - 1
+
+        kwargs[ 'DFMT'  ]   = self.dfmt[ data.itemsize ],
+
+        self.dict.update( kwargs )
+
+        self.__headers__    = self.asarray
+
+        return self
 
 

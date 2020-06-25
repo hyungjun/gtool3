@@ -82,15 +82,22 @@ def test_modification( srcPath ):
     sDTime      = datetime.datetime(2000,1,1)
     delT        = datetime.timedelta(days=1)
     DTime       = [sDTime+delT*i for i in range( gtVar.shape[0] ) ]
-    TStamp      = [dtime.strftime('%Y%m%d %H%M%S ') for dtime in DTime ]
+    TStamp      = [dtime.strftime('%Y%m%d %H%M%S') for dtime in DTime ]
     gtVar.header['DATE']    = TStamp
     print('\t   set "DATE" as %s - %s'%(TStamp[0], TStamp[-1]))
 
     print(gtVar.header)
-    print('='*80)
 
-    chkFlag     = ( gtVar.header['DATE'] == tuple(TStamp) )     \
+    print( gtVar[ [2,5], :, 50:90 ], gtVar[ [2,5], :, 50:90 ].shape )
+    gtVar[ [2,5], :, 50:90 ]    = 999
+    print( gtVar[ [2,5], :, 50:90 ] == 999 )
+
+    chkFlag     = ( gtVar.header['DATE'] == TStamp )     \
                  &( varName == gtVar.header['ITEM'].strip() )
+#                 &( gtVar[5,:,50:90]  == 999 )
+
+    print('\t   modified?', chkFlag )
+    print('='*80)
 
     return chkFlag
 
@@ -180,6 +187,11 @@ def main(args,opts):
     return 
     '''
 
+    #import gtool3
+    #gthdr   = gtool3.gthdr.__gtHdr__( ITEM='test')
+    #print( isinstance( gthdr, gtool3.gthdr.__gtHdr__ ) )
+    #gthdr.auto_fill( arange(10*180*360).reshape(10,1,180,360).astype('float32') )
+ 
 
     testFlag    = []        # flag for the entire test seq.
 
@@ -194,12 +206,11 @@ def main(args,opts):
     print('='*80)
 
     testFlag.append( test_chunkwise_encoding( aSrc, outPath ))
-
-    return 
-
     testFlag.append( test_chunkwise_decoding( outPath, aSrc ))
     testFlag.append( test_modification( outPath )            )
     testFlag.append( test_varwise_decoding( outPath, aSrc )  )
+    return 
+
 
     print(testFlag)
 

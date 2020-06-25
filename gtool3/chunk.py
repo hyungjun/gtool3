@@ -28,9 +28,7 @@ class __gtChunk__( __gtConfig__ ):
             __rawArray__    = args[0]
             header          = kwargs['header']
 
-            __rawArray__    = self.chunking( __rawArray__, header )
-            pos             = 0
-            size            = __rawArray__.size
+            __rawArray__, __blk_idx__   = self.chunking( __rawArray__, header )
 
         # decoding mode
         else:
@@ -39,7 +37,7 @@ class __gtChunk__( __gtConfig__ ):
         self.__rawArray__   = __rawArray__
         self.__blk_idx__    = __blk_idx__
 
-        #print( self.__blk_idx__ )
+        self.size           = __rawArray__.size
 
 
     def __repr__(self):
@@ -81,11 +79,7 @@ class __gtChunk__( __gtConfig__ ):
 
         data    = self.__data__
 
-        #self.encdata    = data.view( '>H' )
-
         header  = self.header
-
-        #print( 'HK*', header )
 
         if header['DFMT'][:3] == 'URY':
 
@@ -114,7 +108,8 @@ class __gtChunk__( __gtConfig__ ):
 
         data.dtype  = 'S1'
 
-        header      = np.array( list( ''.join(header) ), 'S1' ) 
+        #header      = np.array( list( ''.join(header) ), 'S1' ) 
+        header      = header.asarray.flat
 
         hsize       = self.encode4b( self.hdrsize )
         dsize       = self.encode4b( data.size    )
@@ -122,6 +117,8 @@ class __gtChunk__( __gtConfig__ ):
         chunk       = np.concatenate( [ hsize, header,    hsize, 
                                         dsize, data.flat, dsize ] )
 
-        return chunk
+        __blk_idx__ = [ [4,self.hdrsize], [12,data.size] ]
+
+        return chunk, __blk_idx__
 
 
