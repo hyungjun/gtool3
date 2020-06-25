@@ -10,20 +10,18 @@
 #------------------------------------------------------cf0.2@20120401
 
 import  os, sys, time
-import  struct
 
 from    collections                 import OrderedDict
 
-from    numpy                       import memmap, array, concatenate, resize, dtype
+import  numpy                       as  np
 
-from    .config                      import __gtConfig__
-from    .chunk                       import __gtChunk__
-from    .gtvar                       import __gtVar__
-from    .gthdr                       import __gtHdr__
-#from    .gthdr                       import __gtHdrFmt__
+from    .config                     import __gtConfig__
+from    .chunk                      import __gtChunk__
+from    .variable                   import __gtVar__
+from    .header                     import __gtHdr__
 
 
-class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
+class gtFile( __gtConfig__ ):
     '''
     gt=gtool(path, iomode,unit)
 
@@ -35,11 +33,14 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
                     ]
 
     # access ATTR
-    gt.header[varName].DATE = '19990101 000000'
-    gt.header[varName].UTIM = 'HOUR'        # ['HOUR','DAY'] only
-    gt.header[varName].TDUR = 24
+    >>> gt.variables[varName].DATE
+    '19990101 000000'
 
-    gt.data = array()
+    >>> gt.variables[varName].UTIM
+    'HOUR'                                  # ['HOUR','DAY'] only
+
+    >>> gt.variables[varName].TDUR
+    24
 
 
     ******
@@ -118,13 +119,13 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
         '''
 
         if mode in ['r','c','r+']:
-            self.__rawArray__   = memmap(gtPath, 'S1', mode)
+            self.__rawArray__   = np.memmap(gtPath, 'S1', mode)
 
         elif mode == 'w+':
             gtFile  = open(gtPath, 'w')
             gtFile.close()
 
-            self.__rawArray__   = array([], 'S1')
+            self.__rawArray__   = np.array([], 'S1')
             self.gtPath         = gtPath
 
         else:
@@ -136,8 +137,8 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
         self.curr       = 0
         self.__blk_idx__= []            # indices of fortran IO blocks
         self.__chunks__ = []
-        #self.__vars__   = OrderedDict()
 
+        #self.__vars__   = OrderedDict()
         self.__pos__    = OrderedDict()
 
         #self.indexing     = indexing
@@ -156,7 +157,6 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
             size            = self.__pos__[0]
             self.varName    = __gtChunk__( self.__rawArray__, 0, size ).header['ITEM'].strip()
         '''
-
 
         self.iomode     = mode
         self.__version__= __gtConfig__.version
@@ -315,8 +315,8 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
 
             # write to memmap --------------------------------------------------
             pos         = self.__rawArray__.size
-            __memmap__          = memmap( self.gtPath, 'S1', 'r+',
-                                          shape=(self.__rawArray__.size+chunk.size)
+            __memmap__          = np.memmap( self.gtPath, 'S1', 'r+',
+                                             shape=(self.__rawArray__.size+chunk.size)
                                         )
             __memmap__[pos:]    = chunk.__rawArray__
             self.__rawArray__   = __memmap__

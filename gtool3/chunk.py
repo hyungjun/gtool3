@@ -3,7 +3,7 @@ import  os,sys
 import  struct
 import  numpy                   as  np
 
-from    .gthdr                  import  __gtHdr__
+from    .header                 import  __gtHdr__
 from    .config                 import  __gtConfig__
 
 #from    .filters.nbit_unpack      import  nbit_unpack

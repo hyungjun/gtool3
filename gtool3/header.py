@@ -64,7 +64,7 @@ class __gtHdr__( __gtHdrFmt__ ):
 
 
     def __len__( self ):
-        return self.__headers__.shape[0]
+        return len( self.__headers__ )
 
 
     @property
@@ -174,9 +174,9 @@ class __gtHdr__( __gtHdrFmt__ ):
             return self.fmt[ k ][0]( ret[0].strip() ) 
 
         else:
-            ret = list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( ret ) )
+            ret = list( self.fmt[ k ][0]( b.strip() ) for b in ret )
 
-            return ret  if len( ret ) > 1   \
+            return ret  if len( np.unique( ret ) ) > 1   \
               else ret[0]
 
 

@@ -1,22 +1,19 @@
 import  os,sys
-
-#from    numpy               import array, empty
 import  numpy               as  np
 
-from    .gthdr              import __gtHdr__
-from    functools           import reduce
+from    .header             import __gtHdr__
 
 
 class __gtVar__( object ):
 
     def __init__(self, chunks ):
 
+        header          = __gtHdr__( [ chunk.__header__ for chunk in chunks ] )
+        super().__setattr__( 'header', header )
 
-        __hdr0__        = chunks[0].header
-
-        self.item       = __hdr0__['ITEM']
-        self.size       = __hdr0__['SIZE']
-        self.shape      = tuple( [len(chunks)] + list(__hdr0__.shape) )
+        self.item       = header['ITEM']
+        self.size       = header['SIZE']
+        self.shape      = tuple( [len(chunks)] + list(header.shape) )
         self.dtype      = chunks[0].data.dtype      # future performance boost
 
         self.chunks     = chunks
@@ -76,16 +73,38 @@ class __gtVar__( object ):
         # ----------------------------------------------------------------------
 
 
-    @property
-    def header(self):
+    def __getattr__( self, k ):
 
-        headers     = [ chunk.__header__ for chunk in self.chunks ]
+        header  = self.__dict__[ 'header' ]
 
-        return __gtHdr__( headers )
+        if   k in header.keys:
+            return header[ k ]
+
+        elif k in self.__dict__:
+            return self.__dict__[ k ]
+
+        else:
+            #return 0
+            raise KeyError( '{} does not exist.'.format( k ) )
 
 
-    @property
-    def data(self):
-        return self.__getitem__
+    def __setattr__( self, k, v ):
+
+        if k in self.__dict__[ 'header'].keys:
+            self.__dict__[ 'header' ][ k ]  = v
+
+        else:
+            self.__dict__[ k ]  = v
+
+
+    #@property
+    #def header(self):
+    #    headers     = [ chunk.__header__ for chunk in self.chunks ]
+    #    return __gtHdr__( headers )
+
+
+    #@property
+    #def data(self):
+    #    return self.__getitem__
 
 
