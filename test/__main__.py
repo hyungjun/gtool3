@@ -129,9 +129,23 @@ def test_varwise_decoding( srcPath, aOri ):
 def main(args,opts):
 
     gt  = gtopen( 'ndgglw01' )
-    print( 'open file' )
+    print( 'open file -------------------------------------------------------' )
 
-    print( gt.vars )
+    #for c in gt:
+    #    print( c )
+    #print( 'iter chunk -------------------------------------------------------')
+
+    #print( gt.vars )
+    #print( gt.vars['INPGLW01'][:].shape )
+    #print( gt.vars['INPGLW01'][ [2,3]].shape )
+    #print( gt.vars['INPGLW01'][3].shape )
+    #print( gt.vars['INPGLW01'][[3]].shape )
+    #print( gt.vars['INPGLW01'][:,0,...,-10::2].shape )
+    #print( gt.vars['INPGLW01'][([1],[2])].shape )
+    print( gt.vars['INPGLW01'].header )
+    print( 'variables --------------------------------------------------------')
+    sys.exit()
+
     print( gt.variables )
 
     V0  = gt.vars[ 'INPGLW01' ]

@@ -135,7 +135,7 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
         self.curr       = 0
         self.__blk_idx__= []            # indices of fortran IO blocks
         self.__chunks__ = []
-        self.__vars__   = OrderedDict()
+        #self.__vars__   = OrderedDict()
 
         self.__pos__    = OrderedDict()
 
@@ -193,20 +193,14 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
         to be deprecated
         '''
 
-        if len( list(self.__vars__.keys()) ) == 0 or not hasattr( self, '__vars__' ):
+        if not hasattr( self, '__vars__' ):
 
             self.__vars__   = OrderedDict()
 
             for chunk in self:#.__chunks__:
 
-                # speed-up for 'simple' indexingure
-                varName     = chunk.header['ITEM'].strip() if not hasattr( self, 'varName' )    \
-                         else self.varName
-
-                if not varName in self.__vars__:
-                    self.__vars__[varName] = []
-
-                self.__vars__[varName].append( chunk )
+                varName     = chunk.header['ITEM'] 
+                self.__vars__.setdefault( varName, [] ).append( chunk )
 
         return OrderedDict( [(k, __gtVar__(v) ) for k,v in list(self.__vars__.items())] )
 

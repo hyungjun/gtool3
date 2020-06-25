@@ -11,13 +11,15 @@ class __gtVar__( object ):
 
     def __init__(self, chunks ):
 
-        self.chunks     = np.array( chunks )
 
-        self.item       = chunks[0].header['ITEM'].strip()
-        self.shape      = [len(chunks)] + list(self.chunks[0].data.shape)
-        self.shape      = tuple( self.shape )
-        self.size       = reduce( lambda x,y: x*y, self.shape )
-        self.dtype      = chunks[0].data.dtype
+        __hdr0__        = chunks[0].header
+
+        self.item       = __hdr0__['ITEM']
+        self.size       = __hdr0__['SIZE']
+        self.shape      = tuple( [len(chunks)] + list(__hdr0__.shape) )
+        self.dtype      = chunks[0].data.dtype      # future performance boost
+
+        self.chunks     = np.array( chunks )
 
 
     def __repr__(self):
@@ -26,29 +28,23 @@ class __gtVar__( object ):
 
     def __getitem__(self, k):
 
-        Slice   = self.parse_slice( k )
-
-        # assign to aOut -------------------------------------------------------
-        chunks  = self.chunks[Slice[0]]
-
-        outShp  = list( chunks[0].data[ Slice[1:] ].shape )
-
-        if type( Slice[0] ) == slice:
-            outShp  = [ len(chunks) ] + outShp
-
-            aOut    = np.empty( outShp, self.dtype )
-
-            for i,c in enumerate(chunks):
-                aOut[i] = c.data[ Slice[1:] ]
+        if type( k ) is tuple:
+            k0      = k[0]
+            slc     = k[1:]
 
         else:
-            aOut    = np.empty( outShp, self.dtype )
-            aOut[:] = chunks[0].data[ Slice[1:] ]
+            k0      = k
+            slc     = slice( None )
 
-        #aOut    = array([ c.data[ Slice[1:] ] for c in self.chunks[Slice[0]] ])
-        # ----------------------------------------------------------------------
 
-        return aOut#.squeeze()
+        if   type( k0 ) is int:
+            return self.chunks[ k ].data[ slc ]
+
+        elif type( k0 ) is list:
+            return np.array( [ self.chunks[i].data[ slc ] for i in k0 ] )
+
+        else:
+            return np.array( [ c.data[ slc ] for c in self.chunks[ k0 ] ] )
 
 
     def __setitem__(self, k, v):
@@ -94,6 +90,13 @@ class __gtVar__( object ):
 
     @property
     def header(self):
+
+        for c in self.chunks:
+            print('+'*100)
+            print( c.header )
+            print('+'*100)
+
+        sys.exit()
         headers     = [chunk.header.__headers__[0] for chunk in self.chunks]
 
         return __gtHdr__( np.array( headers ) )

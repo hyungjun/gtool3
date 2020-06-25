@@ -15,8 +15,7 @@ class __gtChunk__( __gtConfig__ ):
     def __init__(self, *args, **kwargs):
         '''
         /* decodeing mode */
-        args    = [ __rawArray__, self.curr, chunkSize ]    # __rawArray__: entire gtool file
-        kwargs  = {}
+        args    = [ __rawArray__, __blk_idx__ ]    # __rawArray__: entire gtool file
 
         /* encoding mode */
         args    = [ __rawArray__ ]                          # __rawArray__: appended/extended chunk
@@ -43,11 +42,11 @@ class __gtChunk__( __gtConfig__ ):
         #print( self.__blk_idx__ )
 
 
-    '''
     def __repr__(self):
-
+        return '({})'.format( self.data.shape )
         return self.header.__repr__()
-    '''
+        return '%s, %s : %s'%(self.item, self.shape, self.dtype)
+
 
     @property
     def __header__( self ):
@@ -82,24 +81,28 @@ class __gtChunk__( __gtConfig__ ):
 
         data    = self.__data__
 
-        self.encdata    = data.view( '>H' )
+        #self.encdata    = data.view( '>H' )
 
-        if self.header['DFMT'][:3] == 'URY':
+        header  = self.header
 
-            nbit    = int( self.header['DFMT'][-2:] )
+        #print( 'HK*', header )
+
+        if header['DFMT'][:3] == 'URY':
+
+            nbit    = int( header['DFMT'][-2:] )
 
             sIdx, eIdx  = self.__blk_idx__[1]  # (start, length)
             eIdx       += sIdx
             coef    = self.__rawArray__[sIdx:eIdx]
 
-            data    = nbit_decoder( data, nbit, coef, self.header.shape[0] )
+            data    = nbit_decoder( data, nbit, coef, header.shape[0] )
 
         # ------------------------------------------------------------------------------
         data.dtype  = {'URY':np.dtype('>f4'),
                        'UR4':np.dtype('>f4'),
-                       'UR8':np.dtype('>f8')}[ self.header.DFMT[:3] ]
+                       'UR8':np.dtype('>f8')}[ header['DFMT'][:3] ]
 
-        data.shape  = self.header.shape
+        data.shape  = header.shape
 
         return data
 

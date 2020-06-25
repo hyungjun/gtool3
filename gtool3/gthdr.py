@@ -10,29 +10,30 @@ from    .config             import __gtConfig__
 
 
 class __gtHdrFmt__(object):
+    b2s = bytes.decode
     fmt = OrderedDict([
-("IDFM",[int,"%16i",9010]),     ("DSET",[str,"%-16s",'']),      ("ITEM",[str,"%-16s",'']),      #00
-("EDIT1",[str,"%-16s",'']),     ("EDIT2",[str,"%-16s",'']),     ("EDIT3",[str,"%-16s",'']),     #03
-("EDIT4",[str,"%-16s",'']),     ("EDIT5",[str,"%-16s",'']),     ("EDIT6",[str,"%-16s",'']),     #06
-("EDIT7",[str,"%-16s",'']),     ("EDIT8",[str,"%-16s",'']),     ("FNUM",[int,"%16i",1]),        #09
-("DNUM",[int,"%16i",1]),        ("TITL1",[str,"%-16s",'']),     ("TITL2",[str,"%-16s",'']),     #12
-("UNIT",[str,"%-16s",'']),      ("ETTL1",[str,"%-16s",'']),     ("ETTL2",[str,"%-16s",'']),     #15
-("ETTL3",[str,"%-16s",'']),     ("ETTL4",[str,"%-16s",'']),     ("ETTL5",[str,"%-16s",'']),     #18
-("ETTL6",[str,"%-16s",'']),     ("ETTL7",[str,"%-16s",'']),     ("ETTL8",[str,"%-16s",'']),     #21
-("TIME",[int,"%16i",0]),        ("UTIM",[str,"%-16s",'HOUR']),  ("DATE",[str,"%-16s",'00000000 000000']),#24
-("TDUR",[int,"%16i",0]),        ("AITM1",[str,"%-16s",'']),     ("ASTR1",[int,"%16i",1]),       #27
-("AEND1",[int,"%16i",0]),       ("AITM2",[str,"%-16s",'']),     ("ASTR2",[int,"%16i",1]),       #30
-("AEND2",[int,"%16i",0]),       ("AITM3",[str,"%-16s",'']),     ("ASTR3",[int,"%16i",1]),       #33
-("AEND3",[int,"%16i",0]),       ("DFMT",[str,"%-16s",'UR4']),   ("MISS",[float,"%16.7e",-999.]),#36
-("DMIN",[float,"%16.7e",-999.]),("DMAX",[float,"%16.7e",-999.]),("DIVS",[float,"%16.7e",-999.]),#39
-("DIVL",[float,"%16.7e",-999.]),("STYP",[int,"%16i",1]),        ("COPTN",[str,"%-16s",'']),     #42
-("IOPTN",[int,"%16i",0]),       ("ROPTN",[float,"%16.7e",0.]),  ("DATE1",[str,"%-16s",'']),     #45
-("DATE2",[str,"%-16s",'']),     ("MEMO1",[str,"%-16s",'']),     ("MEMO2",[str,"%-16s",'']),     #48
-("MEMO3",[str,"%-16s",'']),     ("MEMO4",[str,"%-16s",'']),     ("MEMO5",[str,"%-16s",'']),     #51
-("MEMO6",[str,"%-16s",'']),     ("MEMO7",[str,"%-16s",'']),     ("MEMO8",[str,"%-16s",'']),     #54
-("MEMO9",[str,"%-16s",'']),     ("MEMO10",[str,"%-16s",'']),    ("CDATE",[str,"%-16s",'']),     #57
-("CSIGN",[str,"%-16s",'']),     ("MDATE",[str,"%-16s",'']),     ("MSIGN",[str,"%-16s",'']),     #60
-("SIZE",[int,"%16i",0])                                                                         #63
+("IDFM", [int,"%16i",9010]),     ("DSET",  [b2s,"%-16s",'']),      ("ITEM", [b2s,"%-16s",'']),      #00
+("EDIT1",[b2s,"%-16s",'']),      ("EDIT2", [b2s,"%-16s",'']),      ("EDIT3",[b2s,"%-16s",'']),      #03
+("EDIT4",[b2s,"%-16s",'']),      ("EDIT5", [b2s,"%-16s",'']),      ("EDIT6",[b2s,"%-16s",'']),      #06
+("EDIT7",[b2s,"%-16s",'']),      ("EDIT8", [b2s,"%-16s",'']),      ("FNUM", [int,"%16i",1]),        #09
+("DNUM", [int,"%16i",1]),        ("TITL1", [b2s,"%-16s",'']),      ("TITL2",[b2s,"%-16s",'']),      #12
+("UNIT", [b2s,"%-16s",'']),      ("ETTL1", [b2s,"%-16s",'']),      ("ETTL2",[b2s,"%-16s",'']),      #15
+("ETTL3",[b2s,"%-16s",'']),      ("ETTL4", [b2s,"%-16s",'']),      ("ETTL5",[b2s,"%-16s",'']),      #18
+("ETTL6",[b2s,"%-16s",'']),      ("ETTL7", [b2s,"%-16s",'']),      ("ETTL8",[b2s,"%-16s",'']),      #21
+("TIME", [int,"%16i",0]),        ("UTIM",  [b2s,"%-16s",'HOUR']),  ("DATE", [b2s,"%-16s",'00000000 000000']),#24
+("TDUR", [int,"%16i",0]),        ("AITM1", [b2s,"%-16s",'']),      ("ASTR1",[int,"%16i",1]),        #27
+("AEND1",[int,"%16i",0]),        ("AITM2", [b2s,"%-16s",'']),      ("ASTR2",[int,"%16i",1]),        #30
+("AEND2",[int,"%16i",0]),        ("AITM3", [b2s,"%-16s",'']),      ("ASTR3",[int,"%16i",1]),        #33
+("AEND3",[int,"%16i",0]),        ("DFMT",  [b2s,"%-16s",'UR4']),   ("MISS", [float,"%16.7e",-999.]),#36
+("DMIN", [float,"%16.7e",-999.]),("DMAX",  [float,"%16.7e",-999.]),("DIVS", [float,"%16.7e",-999.]),#39
+("DIVL", [float,"%16.7e",-999.]),("STYP",  [int,"%16i",1]),        ("COPTN",[b2s,"%-16s",'']),      #42
+("IOPTN",[int,"%16i",0]),        ("ROPTN", [float,"%16.7e",0.]),   ("DATE1",[b2s,"%-16s",'']),      #45
+("DATE2",[b2s,"%-16s",'']),      ("MEMO1", [b2s,"%-16s",'']),      ("MEMO2",[b2s,"%-16s",'']),      #48
+("MEMO3",[b2s,"%-16s",'']),      ("MEMO4", [b2s,"%-16s",'']),      ("MEMO5",[b2s,"%-16s",'']),      #51
+("MEMO6",[b2s,"%-16s",'']),      ("MEMO7", [b2s,"%-16s",'']),      ("MEMO8",[b2s,"%-16s",'']),      #54
+("MEMO9",[b2s,"%-16s",'']),      ("MEMO10",[b2s,"%-16s",'']),      ("CDATE",[b2s,"%-16s",'']),      #57
+("CSIGN",[b2s,"%-16s",'']),      ("MDATE", [b2s,"%-16s",'']),      ("MSIGN",[b2s,"%-16s",'']),      #60
+("SIZE", [int,"%16i",0])                                                                            #63
     ])
 
     dictDFMT    = {'UR4':'>f4', dtype('>f4'):'UR4',
@@ -52,6 +53,15 @@ class __gtHdrFmt__(object):
             self.dtype  = self.dictDFMT[self.DFMT]
             self.delT   = self.dictUTIM[self.UTIM] * self.TDUR
             self.dtime  = datetime.datetime.strptime(self.DATE,'%Y%m%d %H%M%S')
+
+
+    def cast( self, k, values ):
+
+        if len( values ) == 1:
+            return self.fmt[ k ][0]( values[0].strip() )
+
+        else:
+            return list( self.fmt[ k ][0]( b.strip() ) for b in unique( values ) )
 
 
     def gen_header( self, header=None, **kwargs ):
@@ -103,8 +113,6 @@ class __gtHdrFmt__(object):
         header  = [ h if len(h) == nMax else h*nMax
                             for h in header ]
 
-        return list(zip(*header))
-
 
     '''
     def str2dict(self,header):
@@ -129,9 +137,28 @@ class __gtHdr__(__gtHdrFmt__):
             self.__headers__    = headers#.view( 'S16' ).astype( 'U16' )
             #self.__headers__    = headers    if type( headers ) == list   else [ headers ]
 
-        self.keys           = list( self.fmt.keys() )
+        self.keys   = list( self.fmt.keys() )
 
-        print( self.shape )
+        self.dict   = OrderedDict( 
+                            ( k, self.cast( k, v ) ) for k, v in self.asdict.items()
+                    )
+
+
+    def __getitem__(self,k):
+
+        ret     = self.asdict[ k ]
+
+        if ret.shape[0] == 1:
+            return self.fmt[ k ][0]( ret[0].strip() ) 
+
+        else:
+            ret = list( self.fmt[ k ][0]( b.strip() ) for b in unique( ret ) )
+
+            return ret  if len( ret ) > 1   \
+              else ret[0]
+
+
+
 
     @property
     def asdict( self ):
@@ -178,65 +205,52 @@ class __gtHdr__(__gtHdrFmt__):
 
 
     def __repr__(self):
-        hdr         = self.__hdr__
 
-        print( hdr, hdr[0].dtype, hdr[0].shape )
-        sys.exit()
+        hdict       = self.dict     # headers <OrderedDict>
 
+        put2note    = [ k for k, v in hdict.items() if len( unique( v ) ) > 1 ]
+
+        #print( self.__headers__.shape)
+        #print( hdict )
+        #print(put2note)
+
+
+        hdr0        = self.__headers__[0].view( 'S16' ).astype( 'U16' )
         nCol        = 3
+        strOut      = []
 
-        #put2note    = [ k for k, v in map( None, self.keys, hdr ) if hasattr( v, '__iter__' ) ]
-        put2note    = [ k for k, v in zip( self.keys, hdr ) if hasattr( v, '__iter__' ) ]
-
-        '''
-        for k,v in map( None, self.keys, hdr ):
-            print k,v
-        print self.keys.index(k), hdr[63]
-        print put2note
-        '''
-
-        strOut      = [ ]
-        Line        = ['[00]  ']
-
-
-        #for i in range(0, len( hdr ), nCol):
-        #    strOut.append(  '[%02d]  '%i
-        #                  + ''.join( ['%-6s :%s:  '%(k, v if k not in put2note else
-        #                              '   ** NOTE **   ')
-        #                                         for k, v  in map( None,
-        #                                                           self.keys[i:i+nCol],
-        #                                                           hdr[i:i+nCol] )
-        #                              ] )
-        #                  )
-
-
-        for i in range(0, len( hdr ), nCol):
-            strOut.append(  '[%02d]  '%i
-                          + ''.join( ['%-6s :%s:  '%(k, v if k not in put2note else
-                                      '   ** NOTE **   ')
-                                                 for k, v  in zip( self.keys[i:i+nCol],
-                                                                   hdr[i:i+nCol] )
+        for i in range( 0, len( self.keys ), nCol ):
+            strOut.append( '[%02d]  '%i
+                         + ''.join( ['%-6s :%s:  '%(k, v if k not in put2note else
+                                     '   ** NOTE **   ')
+                                            for k, v  in zip( 
+                                                            self.keys[i:i+nCol],
+                                                            hdr0[i:i+nCol] )
                                       ] )
                           )
 
+        #print( '\n'.join( strOut ) );sys.exit()
+        return '\n'+'\n'.join(strOut)+'\n'
+ 
+        ## when put2noet != [] --------------------------------------------------
+        #strNote     = ['\n   ** NOTE **   ',]
+        #noteFmt     = '[%02d]  %-6s :%s, (%i)'
+
+        #for k in put2note:
+        #    idx = self.keys.index( k )
+        #    v   = hdict[ idx ]
+
+        #    if not hasattr(v, '__iter__'):  v = [v]
+
+        #    strNote.append( noteFmt%( idx, k, '[%s ... %s]'%(v[0], v[-1]), len(v) ) )
+
+        #return '\n'+'\n'.join(strOut + strNote)+'\n'
+        ## ----------------------------------------------------------------------
+
+                       
+
         if put2note == []:
             return '\n'+'\n'.join(strOut)+'\n'
-
-
-        # when put2noet != [] --------------------------------------------------
-        strNote     = ['\n   ** NOTE **   ',]
-        noteFmt     = '[%02d]  %-6s :%s, (%i)'
-
-        for k in put2note:
-            idx = self.keys.index( k )
-            v   = hdr[ idx ]
-
-            if not hasattr(v, '__iter__'):  v = [v]
-
-            strNote.append( noteFmt%( idx, k, '[%s ... %s]'%(v[0], v[-1]), len(v) ) )
-
-        return '\n'+'\n'.join(strOut + strNote)+'\n'
-        # ----------------------------------------------------------------------
 
 
     '''
@@ -265,34 +279,13 @@ class __gtHdr__(__gtHdrFmt__):
         ret     = self.asdict[ k ]
 
         if ret.shape[0] == 1:
-            print( '***', self.fmt[ k ][0]( ret[0].astype('U16') ) )
-            print( '   ', type( self.fmt[ k ][0]( ret[0].astype('U16') ) ) )
-            return self.fmt[ k ][0]( ret[0] ) 
-
-        sys.exit()
-        print(k, ret, type(ret))
-        return ret
-
-        return ret[0].strip() if unique( ret ).size == 1     \
-          else ret
-
-
-        '''
-        hdr     = self.__hdr__
-
-        ret     = hdr[ self.keys.index(k) ] 
-
-        if type( ret ) in [ tuple ]:
-            return [ b for b in ret ]
-            #return [ b.decode() for b in ret ]
+            return self.fmt[ k ][0]( ret[0].strip() ) 
 
         else:
-            return ret
-            #return ret.decode()
+            ret = list( self.fmt[ k ][0]( b.strip() ) for b in unique( ret ) )
 
-
-        #return hdr[ self.keys.index(k) ].decode()
-        '''
+            return ret  if len( ret ) > 1   \
+              else ret[0]
 
 
     def __setitem__(self, k, v):
