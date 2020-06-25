@@ -88,13 +88,13 @@ def test_modification( srcPath ):
 
     print(gtVar.header)
 
-    print( gtVar[ [2,5], :, 50:90 ], gtVar[ [2,5], :, 50:90 ].shape )
+    print( gtVar[ [2,5], :, 50:90 ].shape )
     gtVar[ [2,5], :, 50:90 ]    = 999
-    print( gtVar[ [2,5], :, 50:90 ] == 999 )
+    print('\t   set data[ [2,5], :, 50:90 ] as 999' )
 
-    chkFlag     = ( gtVar.header['DATE'] == TStamp )     \
-                 &( varName == gtVar.header['ITEM'].strip() )
-#                 &( gtVar[5,:,50:90]  == 999 )
+    chkFlag     = ( gtVar.header['DATE'] == TStamp )            \
+                 &( varName == gtVar.header['ITEM'].strip() )   \
+                 &( np.all( gtVar[ [2,5], :, 50:90 ]  == 999 ) )
 
     print('\t   modified?', chkFlag )
     print('='*80)
@@ -104,7 +104,7 @@ def test_modification( srcPath ):
 
 def test_varwise_decoding( srcPath, aOri ):
 
-    gtSrc       = gtopen( srcPath, 'r', struct='simple' )
+    gtSrc       = gtopen( srcPath, 'r', indexing=False )
     print( gtSrc.vars )
     gtVar       = gtSrc.vars['test']
 
@@ -123,8 +123,10 @@ def test_varwise_decoding( srcPath, aOri ):
         print('\t\titer aSrc:', a.shape, a.min(), a.max())
 
     print('='*80)
+    
+    mask        = aSrc != 999
 
-    chkFlag     = all(aSrc.flatten() == aOri.flatten())
+    chkFlag     = np.all( aSrc[ mask ] == aOri[ mask ] )
 
     print()
     print('\t   identical to aOri?', chkFlag, aSrc.shape)
@@ -134,58 +136,6 @@ def test_varwise_decoding( srcPath, aOri ):
 
 
 def main(args,opts):
-
-    '''
-    gt  = gtopen( 'ndgglw01' )
-    print( 'open file -------------------------------------------------------' )
-
-    for c in gt:
-        print( c, c.header )
-    print( 'iter chunk -------------------------------------------------------')
-
-    #print( gt.vars )
-    #print( gt.vars['INPGLW01'][:].shape )
-    #print( gt.vars['INPGLW01'][ [2,3]].shape )
-    #print( gt.vars['INPGLW01'][3].shape )
-    #print( gt.vars['INPGLW01'][[3]].shape )
-    #print( gt.vars['INPGLW01'][:,0,...,-10::2].shape )
-    #print( gt.vars['INPGLW01'][([1],[2])].shape )
-    print( gt.vars['INPGLW01'].header )
-    print( 'variables --------------------------------------------------------')
-    sys.exit()
-
-    print( gt.variables )
-
-    V0  = gt.vars[ 'INPGLW01' ]
-    print( V0.dtype, V0.shape )
-
-    print( V0.header )
-
-    #for chunk in V0:
-    #    print( chunk )
-
-
-    sys.exit()
-
-    d1  = np.fromfile( 'ndgglw01.bin','>f4')
-    V1  = d1.reshape( 12,6,128,256 )
-
-    print( V1.dtype, V1.shape )
-
-    for v0, v1 in zip( V0, V1 ):
-        print( np.sum( (v1-v0)**2 ) )
-
-
-    sys.exit()
-
-    for g in gt: print( g )
-
-    print( gt.vars )
-    print( gt.vars['GLW'].header )
-    
-
-    return 
-    '''
 
     #import gtool3
     #gthdr   = gtool3.gthdr.__gtHdr__( ITEM='test')
@@ -209,8 +159,6 @@ def main(args,opts):
     testFlag.append( test_chunkwise_decoding( outPath, aSrc ))
     testFlag.append( test_modification( outPath )            )
     testFlag.append( test_varwise_decoding( outPath, aSrc )  )
-    return 
-
 
     print(testFlag)
 

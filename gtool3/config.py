@@ -7,7 +7,7 @@ class __gtConfig__(object):
 
     hdrsize     = 1024      # bytes
 
-    version     = '0.55'
+    version     = '0.6b'
 
     def encode4b( self, num ):
         '''

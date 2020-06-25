@@ -93,31 +93,6 @@ class __gtHdr__( __gtHdrFmt__ ):
                 )
 
 
-    '''
-    @property
-    def __get_str__(self):
-
-        chksumHdr   = list( struct.pack( '>i4', self.hdrBytes-8 ) ) # w/o checksum
-        header      = list( ''.join(header) )
-
-        [ list( ''.join( __header__ ) ) for __header__ in self.__headers__]
-
-        return
-    '''
-
-    '''
-    @property
-    def __hdr__(self):
-
-
-        __hdr__     = [ attr[0] if len(set( attr )) == 1 else
-                        attr
-                                    for attr in zip(*self.__headers__) ]
-
-        return __hdr__
-    '''
-
-
     #def template(self, **kwargs):
     #    __headers__ = array( self.__headers__[:] )
 
@@ -234,38 +209,6 @@ class __gtHdr__( __gtHdrFmt__ ):
 
         return header
         
-
-    '''
-    def __setitem__(self,k,v):
-#        if k not in ['TIME','dIdx','mIdx']: self.__dictHdr__[k]  = self.fmt[k][0](v)
-        if k not in ['TIME','dIdx','mIdx']: self.__dictHdr__[k]  = self.fmt[k][1]%v
-        else                              : self.__dictHdr__[k]  = v
-    '''
-
-
-    '''
-    def __iter__(self):
-        for key in self.__dictHdr__:
-            yield key
-    '''
-
-
-    '''
-    @property
-    def template(self):
-        Template    = []
-        for _k,_v in self.header.items():
-            if _k in ['dIdx','mIdx']:   continue    # skip records for file structure
-
-            if type(_v) not in [list,tuple]:
-                _v  = __gtHdrFmt__.fmt[_k][0](_v)   # convert back to defalut type
-                Template.append(self.fmt[_k][1]%_v)
-
-            else:
-                Template.append(_v)
-
-        return Template
-    '''
 
     def auto_fill( self, data, header=None, **kwargs ):
         '''

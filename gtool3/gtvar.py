@@ -75,33 +75,6 @@ class __gtVar__( object ):
                 c.data[ slc ]   = v[i]
         # ----------------------------------------------------------------------
 
-    '''
-    def parse_slice(self, k):
-        # parse slice ----------------------------------------------------------
-        if not hasattr(k, '__iter__'):  k = [k]
-
-        if len(k) > len(self.shape):# and not Ellipsis in k:
-            raise KeyError('shape %s does not match with slice %s'%(self.shape, k))
-
-        Slice   = []
-
-        for slc in k:
-
-            if slc == Ellipsis:
-                Slice.extend( [ slice(None,None,None) ]*(len(self.shape)-len(k)+1) )
-
-            elif type(slc) == int:
-                Slice.append([slc])
-
-            else:
-                Slice.append(slc)
-
-        Slice.extend( [ slice(None,None,None) ]*(len(self.shape)-len(Slice)) )
-        # ----------------------------------------------------------------------
-
-        return tuple( Slice )
-    '''
-
 
     @property
     def header(self):

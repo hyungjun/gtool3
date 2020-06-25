@@ -164,12 +164,6 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
 
     def __getitem__(self, k):
         return self.__chunks__[k]
-        #pos     = self.chunks[k].pos
-        #size    = self.chunks[k].size
-
-        #rawArray= self.__rawArray__[pos: pos+size]
-
-        #return __gtChunk__( pos, size, self.__rawArray__ )
 
 
 #    @property
@@ -226,50 +220,8 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
         self.__blk_idx__    = blk_idx
 
 
-    '''
-    def set_uniform_pos(self):
-
-        pos             = 0
-        defaultSize     = self.get_chunksize( 0 )
-
-        while pos < self.size:
-
-            self.__pos__[ pos ] = defaultSize
-
-            pos += defaultSize
-
-        return
-
-
-    def get_chunksize(self, curr):
-
-        if curr in list(self.__pos__.keys()):
-            return self.__pos__[ curr ]
-
-        else:
-
-            dataPos         = curr + self.hdrsize + 8      # position of data block starts
-
-            dataSize        = self.__rawArray__[dataPos: dataPos+4]
-            dataSize.dtype  = '>i4'
-
-            dataSize        = dataSize[0]           # length of data block in 4-byte
-
-            print( 'curr:', curr, dataSize )
-
-            chunkSize       = self.hdrsize + 8 + dataSize + 8
-
-            self.__pos__[self.curr] = self.curr+chunkSize
-
-            return chunkSize
-    '''
-
-
     def get_block_len( self, pos ):
-
         return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
-
-        #return pos+4, pos+4 + blk_len
 
 
     def __iter__(self):
@@ -308,30 +260,6 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
         self.curr  += 1
 
         return __gtChunk__( self.__rawArray__, self.__blk_idx__[-1] )
-
-    '''
-    def __next__(self):
-
-        if self.curr == self.size:
-            self.curr   = 0
-            raise StopIteration
-
-        chunkSize   = self.get_chunksize( self.curr )
-
-        chunk       = __gtChunk__( self.__rawArray__, self.curr, chunkSize )
-
-        self.curr += chunkSize
-
-        return chunk
-    '''
-
-
-    def extend(self):
-        '''
-        Data    : nd-array in rank-4 (T, Z, Y, X)
-        headers : <type>    in [ __gtHdr__, iterable, ]??,
-        '''
-        return
 
 
     def append(self, Data, headers=None, **kwargs):
@@ -394,10 +322,6 @@ class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
             self.__rawArray__   = __memmap__
             self.__rawArray__[pos:]     = chunk.__rawArray__
 
-            '''
-            self.__rawArray__   = concatenate( [self.__rawArray__, chunk] )
-            # in case using 'concatenate' need to add write routine
-            '''
             # ------------------------------------------------------------------
 
 

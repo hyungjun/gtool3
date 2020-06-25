@@ -67,12 +67,6 @@ class __gtChunk__( __gtConfig__ ):
 
         return __gtHdr__( self.__header__[None,:] )
 
-        '''
-        __header__      = self.__rawArray__[sIdx:eIdx].view( 'S16' ).astype( 'U16' )
-
-        return __gtHdr__( __header__[None,:] )
-        '''
-
 
     @property
     def data(self):
