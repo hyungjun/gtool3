@@ -128,12 +128,13 @@ def test_varwise_decoding( srcPath, aOri ):
 
 def main(args,opts):
 
+    '''
     gt  = gtopen( 'ndgglw01' )
     print( 'open file -------------------------------------------------------' )
 
-    #for c in gt:
-    #    print( c )
-    #print( 'iter chunk -------------------------------------------------------')
+    for c in gt:
+        print( c, c.header )
+    print( 'iter chunk -------------------------------------------------------')
 
     #print( gt.vars )
     #print( gt.vars['INPGLW01'][:].shape )
@@ -177,6 +178,7 @@ def main(args,opts):
     
 
     return 
+    '''
 
 
     testFlag    = []        # flag for the entire test seq.
@@ -192,6 +194,9 @@ def main(args,opts):
     print('='*80)
 
     testFlag.append( test_chunkwise_encoding( aSrc, outPath ))
+
+    return 
+
     testFlag.append( test_chunkwise_decoding( outPath, aSrc ))
     testFlag.append( test_modification( outPath )            )
     testFlag.append( test_varwise_decoding( outPath, aSrc )  )

@@ -44,7 +44,7 @@ class __gtHdrFmt__(object):
                    'SEC':datetime.timedelta(seconds=1),
                         }
 
-
+    '''
     def __init__(self,header=None):
         if header != None:
             for (k,v),hdr in map(None,list(self.fmt.items()),header):
@@ -53,6 +53,7 @@ class __gtHdrFmt__(object):
             self.dtype  = self.dictDFMT[self.DFMT]
             self.delT   = self.dictUTIM[self.UTIM] * self.TDUR
             self.dtime  = datetime.datetime.strptime(self.DATE,'%Y%m%d %H%M%S')
+    '''
 
 
     def cast( self, k, values ):
@@ -64,6 +65,7 @@ class __gtHdrFmt__(object):
             return list( self.fmt[ k ][0]( b.strip() ) for b in unique( values ) )
 
 
+    '''
     def gen_header( self, header=None, **kwargs ):
 
         header  = [ v[1]%( v[2] if k not in kwargs else
@@ -72,12 +74,29 @@ class __gtHdrFmt__(object):
                                     for k,v in list(self.fmt.items()) ]
 
         return header
+    '''
+
+    @property
+    def default_dict( self ):
+        return OrderedDict( [ ( k, v[1]%v[2] ) for k,v in list(self.fmt.items()) ] )
 
 
-    def auto_fill( self, headers=None, **kwargs ):
+    def auto_fill( self, data, header=None, **kwargs ):
         '''
-        headers : <list> of header
+        generate header
+
+        IN
+        ==
+        Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
+        header  <__gtHdr__> gtool3 header instance
+
+        kwargs  <dict>      attributes to override default or given header template
+
+        OUT
+        ===
+        header  <__gtHdr__>
         '''
+
 
         keys    = list(self.fmt.keys())
 
@@ -124,29 +143,37 @@ class __gtHdr__(__gtHdrFmt__):
 
     def __init__(self, headers=None, **kwargs):
         '''
-        headers     <nd-array>      header array [ (n, 64, 16), 'U16' ]
+        headers     <memmap>      header array in 1024 bytes length
         '''
 
         # when header == None (e.g., newly generated gtfile) -------------------
         if headers is None or kwargs != {}:
 
-            self.__headers__    = self.auto_fill( headers, **kwargs )
+            def_dict            = self.default_dict
+
+            self.__headers__    = array( str.encode( ''.join( v for k,v in def_dict.items() ) )).view('1024S1')
+
+
+            #self.__headers__    = self.auto_fill( headers, **kwargs )
         # ----------------------------------------------------------------------
 
         else:
             self.__headers__    = headers#.view( 'S16' ).astype( 'U16' )
             #self.__headers__    = headers    if type( headers ) == list   else [ headers ]
-
+        
         self.keys   = list( self.fmt.keys() )
 
         self.dict   = OrderedDict( 
                             ( k, self.cast( k, v ) ) for k, v in self.asdict.items()
                     )
+        print( self.asdict )
+
 
 
     def __getitem__(self,k):
 
-        ret     = self.asdict[ k ]
+        #ret     = self.asdict[ k ]
+        ret     = self.dict[ k ]
 
         if ret.shape[0] == 1:
             return self.fmt[ k ][0]( ret[0].strip() ) 
@@ -156,8 +183,6 @@ class __gtHdr__(__gtHdrFmt__):
 
             return ret  if len( ret ) > 1   \
               else ret[0]
-
-
 
 
     @property
@@ -198,10 +223,10 @@ class __gtHdr__(__gtHdrFmt__):
     '''
 
 
-    def template(self, **kwargs):
-        __headers__ = array( self.__headers__[:] )
+    #def template(self, **kwargs):
+    #    __headers__ = array( self.__headers__[:] )
 
-        return self.auto_fill(__headers__, **kwargs)
+    #    return self.auto_fill(__headers__, **kwargs)
 
 
     def __repr__(self):
@@ -212,7 +237,7 @@ class __gtHdr__(__gtHdrFmt__):
 
         #print( self.__headers__.shape)
         #print( hdict )
-        #print(put2note)
+        print(put2note)
 
 
         hdr0        = self.__headers__[0].view( 'S16' ).astype( 'U16' )
@@ -229,29 +254,26 @@ class __gtHdr__(__gtHdrFmt__):
                                       ] )
                           )
 
-        #print( '\n'.join( strOut ) );sys.exit()
-        return '\n'+'\n'.join(strOut)+'\n'
- 
-        ## when put2noet != [] --------------------------------------------------
-        #strNote     = ['\n   ** NOTE **   ',]
-        #noteFmt     = '[%02d]  %-6s :%s, (%i)'
-
-        #for k in put2note:
-        #    idx = self.keys.index( k )
-        #    v   = hdict[ idx ]
-
-        #    if not hasattr(v, '__iter__'):  v = [v]
-
-        #    strNote.append( noteFmt%( idx, k, '[%s ... %s]'%(v[0], v[-1]), len(v) ) )
-
-        #return '\n'+'\n'.join(strOut + strNote)+'\n'
-        ## ----------------------------------------------------------------------
-
-                       
 
         if put2note == []:
             return '\n'+'\n'.join(strOut)+'\n'
+ 
+        # when put2noet != [] --------------------------------------------------
+        strNote     = ['\n   ** NOTE **   ',]
+        noteFmt     = '[%02d]  %-6s :%s, (%i)'
 
+        for k in put2note:
+            idx = self.keys.index( k )
+            v   = hdict[ k ]
+
+            if not hasattr(v, '__iter__'):  v = [v]
+
+            strNote.append( noteFmt%( idx, k, '[%s ... %s]'%(v[0], v[-1]), len(v) ) )
+
+        return '\n'+'\n'.join(strOut + strNote)+'\n'
+        # ----------------------------------------------------------------------
+
+                       
 
     '''
     def __getattr__( self, k ):
@@ -303,19 +325,10 @@ class __gtHdr__(__gtHdrFmt__):
                               fmt%fn( v )
 
 
+    def toarray( self ):
+        return np.array( ''.join( v for k,v in self.dict.items() ), 'S1024' )
 
-    def todict( self, headers ):
-        '''
-        headers     <nd-array>      headers in nd-array [ (n, 1024), 'S1' ]
 
-        return
-        ======
-        outdict     <OrderedDict>   headers
-        '''
-
-        outdict     = ( () )
-
-        return
 
 
 

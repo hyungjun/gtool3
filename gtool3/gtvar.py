@@ -91,13 +91,7 @@ class __gtVar__( object ):
     @property
     def header(self):
 
-        for c in self.chunks:
-            print('+'*100)
-            print( c.header )
-            print('+'*100)
-
-        sys.exit()
-        headers     = [chunk.header.__headers__[0] for chunk in self.chunks]
+        headers     = [chunk.__header__ for chunk in self.chunks]
 
         return __gtHdr__( np.array( headers ) )
 

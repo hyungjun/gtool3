@@ -19,10 +19,11 @@ from    numpy                       import memmap, array, concatenate, resize, d
 from    .config                      import __gtConfig__
 from    .chunk                       import __gtChunk__
 from    .gtvar                       import __gtVar__
-from    .gthdr                       import __gtHdrFmt__
+from    .gthdr                       import __gtHdr__
+#from    .gthdr                       import __gtHdrFmt__
 
 
-class gtFile( __gtConfig__, __gtHdrFmt__ ):
+class gtFile( __gtConfig__ ):#, __gtHdrFmt__ ):
     '''
     gt=gtool(path, iomode,unit)
 
@@ -335,9 +336,27 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
 
     def append(self, Data, headers=None, **kwargs):
         '''
-        Data    : nd-array in rank-3 (Z, Y, X)
-        headers : <type>    in [ __gtHdr__, iterable, ]??,
+        append one chunk
+
+        IN
+        ==
+        Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
+        header  <__gtHdr__> gtool3 header instance
+
+        kwargs  <dict>      attributes to override default or given header template
+
+        OUT
+        ===
+        header  <__gtHdr__>
         '''
+
+        header          = __gtHdr__()
+        print( header )
+        sys.exit()
+
+        headers             = self.auto_fill( data, **kwargs )
+        print( headers )
+        sys.exit()
 
         if headers == None:
             native_code = sys.byteorder == 'little' and '<' or '>'
@@ -363,8 +382,10 @@ class gtFile( __gtConfig__, __gtHdrFmt__ ):
             kwargs[ 'SIZE'  ]   = aend1*aend2*aend3,
 
 
-        if kwargs != {}:
-            headers             = self.auto_fill( headers=headers, **kwargs )
+        headers             = self.auto_fill( headers=headers, **kwargs )
+
+        print( headers )
+        sys.exit()
 
 
         #for data, header in map(None, Data, headers):
