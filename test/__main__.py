@@ -31,7 +31,7 @@ def test_chunkwise_encoding( aSrc, outPath ):
     for a in aSrc:
 
         print('\t\tappend:', a.shape, a.min(), a.max())
-        gtOut.append( a )
+        gtOut.append( a[None,] )
 
     print()
     print('\t   out path: %s'%outPath, gtOut.vars)

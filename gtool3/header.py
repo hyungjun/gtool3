@@ -238,7 +238,7 @@ class __gtHdr__( __gtHdrFmt__ ):
         kwargs[ 'AEND1' ]   = self['ASTR1'] + xsize - 1
         kwargs[ 'AEND2' ]   = self['ASTR2'] + ysize - 1
         kwargs[ 'AEND3' ]   = self['ASTR3'] + zsize - 1
-        kwargs[ 'SIZE'  ]   = zsize * ysize * xsize - 1
+        kwargs[ 'SIZE'  ]   = zsize * ysize * xsize
 
         kwargs[ 'DFMT'  ]   = self.dfmt[ data.itemsize ],
 

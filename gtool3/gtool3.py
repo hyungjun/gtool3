@@ -126,17 +126,19 @@ class gtFile( __gtConfig__ ):
             gtFile.close()
 
             self.__rawArray__   = np.array([], 'S1')
-            self.gtPath         = gtPath
 
         else:
             raise ValueError('%s is not supported option'%mode)
+
+
+        self.gtPath         = gtPath
 
         self.pos        = 0
         self.size       = self.__rawArray__.size
 
         self.curr       = 0
         self.__blk_idx__= []            # indices of fortran IO blocks
-        self.__chunks__ = []
+        #self.__chunks__ = []
 
         #self.__vars__   = OrderedDict()
         self.__pos__    = OrderedDict()
@@ -162,19 +164,19 @@ class gtFile( __gtConfig__ ):
         self.__version__= __gtConfig__.version
 
 
-    def __getitem__(self, k):
-        return self.__chunks__[k]
+    def __getitem__(self, slc):
+        return self.__chunks__[ slc ]
 
 
-#    @property
-#    def chunks(self):
-#        '''
-#        for delayed process
-#        '''
-#        if not hasattr( self, '__chunk__'):
-#            self.__chunks__ = [ chunk for chunk in self ]
-#
-#        return self.__chunks__
+    @property
+    def chunks(self):
+        '''
+        for delayed process
+        '''
+        if not hasattr( self, '__chunk__'):
+            self.__chunks__ = [ chunk for chunk in self ]
+
+        return self.__chunks__
 
 
     @property
@@ -192,7 +194,7 @@ class gtFile( __gtConfig__ ):
 
             self.__vars__   = OrderedDict()
 
-            for chunk in self:#.__chunks__:
+            for chunk in self:
 
                 varName     = chunk.header['ITEM'] 
                 self.__vars__.setdefault( varName, [] ).append( chunk )
@@ -200,24 +202,24 @@ class gtFile( __gtConfig__ ):
         return OrderedDict( [(k, __gtVar__(v) ) for k,v in list(self.__vars__.items())] )
 
 
-    def indexing( self ):
-        '''
-        '''
+    #def indexing( self ):
+    #    '''
+    #    '''
 
-        blk_idx = []            # indices of fortran IO blocks
+    #    blk_idx = []            # indices of fortran IO blocks
 
-        pos     = 0
+    #    pos     = 0
 
-        while pos < self.__rawArray__.size:
+    #    while pos < self.__rawArray__.size:
 
-            blk_len = int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+    #        blk_len = int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
 
-            blk_idx.append( [ pos+4, pos+4 + blk_len ] )
+    #        blk_idx.append( [ pos+4, pos+4 + blk_len ] )
 
-            print( pos+4, blk_len, blk_idx[-1] )
-            pos += blk_len + 8
+    #        print( pos+4, blk_len, blk_idx[-1] )
+    #        pos += blk_len + 8
 
-        self.__blk_idx__    = blk_idx
+    #    self.__blk_idx__    = blk_idx
 
 
     def get_block_len( self, pos ):
@@ -262,22 +264,24 @@ class gtFile( __gtConfig__ ):
         return __gtChunk__( self.__rawArray__, self.__blk_idx__[-1] )
 
 
-    def append(self, Data, headers=None, **kwargs):
+    def append( self, Data, headers=None, attrs={} ):
+    #def append( self, Data, attrs={}, headers=None ):
         '''
         append one chunk
 
         IN
         ==
-        Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
-        header  <__gtHdr__> gtool3 header instance
-                <memmap>
-
-        kwargs  <dict>      attributes to override default or given header template
+        Data        <nd-array>              data array in rank-4 (T, Z, Y, X)
+        header      <__gtHdr__>             gtool3 header instance
+                    <memmap>
+        attrs       <dict or OrderedDict>   attributes to override default or given header template
 
         OUT
         ===
-        header  <__gtHdr__>
+        header      <__gtHdr__>
         '''
+
+        assert( len( Data.shape ) == 4 ), 'Rank of Data should be 4'
 
 
         if headers == None:
@@ -294,14 +298,15 @@ class gtFile( __gtConfig__ ):
             Data.dtype  = dtypedescr
 
 
-        headers         = __gtHdr__( headers = headers ).auto_fill( Data, **kwargs )
+        #headers         = __gtHdr__( headers = headers ).auto_fill( Data, **attrs )
+        headers         = __gtHdr__( headers = headers ).auto_fill( Data, **attrs )
 
 
         #for data, header in map(None, Data, headers):
         for data, header in zip( Data, headers):
 
             chunk       = __gtChunk__( data, header=header )
-            self.__chunks__.append( chunk )
+            #self.__chunks__.append( chunk )
 
             varName     = header['ITEM']
 
@@ -314,7 +319,7 @@ class gtFile( __gtConfig__ ):
             self.__vars__[varName].append( chunk )
 
             # write to memmap --------------------------------------------------
-            pos         = self.__rawArray__.size
+            pos                 = self.__rawArray__.size
             __memmap__          = np.memmap( self.gtPath, 'S1', 'r+',
                                              shape=(self.__rawArray__.size+chunk.size)
                                         )
