@@ -116,6 +116,7 @@ class gtFile( __gtConfig__ ):
         '''
         indexing  <bool>    True : scan entire file (e.g., for multiple vars & dims container)
                             False: scan first block only & uniform file structure (e.g., for ingel var container)
+                          & 'smart' option? comparing first & last chunk ?
         '''
 
         if mode in ['r','c','r+']:
@@ -165,11 +166,42 @@ class gtFile( __gtConfig__ ):
 
 
     def __getitem__(self, slc):
-        return self.__chunks__[ slc ]
+
+        if type( slc ) == int:
+
+            pos     = 0
+
+            if slc >= 0:
+
+                for _ in range( slc+1 ):
+                    blk_idx = self.get_block_idx_fwd( pos )
+                    pos     = blk_idx[-1][0] + blk_idx[-1][1] + 4
+
+            else:
+
+                for _ in range( abs(slc) ):
+
+                    blk_idx = self.get_block_idx_bwd( pos )
+                    pos     = blk_idx[0][0] - 4
+
+            return __gtChunk__( self.__rawArray__, blk_idx )
+
+        else:
+
+            return self.chunks[ slc ]
+
+
+    def __len__(self):
+        '''
+        count number of chunks
+        '''
+        return len( self.chunks )
 
 
     @property
     def chunks(self):
+        return [ chunk for chunk in self ]
+
         '''
         for delayed process
         '''
@@ -222,8 +254,60 @@ class gtFile( __gtConfig__ ):
     #    self.__blk_idx__    = blk_idx
 
 
-    def get_block_len( self, pos ):
-        return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+    def get_block_size( self, pos ):
+        return self.__rawArray__[ pos:pos+4 ].view( '>i' )[0]
+        #return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+
+
+    def get_block_idx_fwd( self, pos ):
+
+        blk_idx = []
+
+        while 1:
+
+            blk_idx.append( ( pos+4, self.get_block_size( pos ) ) )
+
+            pos    += blk_idx[-1][-1] + 8
+
+            if pos >= self.__rawArray__.size:
+                break
+
+            gtid    = self.__rawArray__[ pos+4:pos+20 ].tostring() 
+
+            if gtid == b'            9010':
+                break
+
+        return blk_idx
+
+
+    def get_block_idx_bwd( self, pos ):
+
+        #if pos < 0: 
+        #    pos = self.__rawArray__.size + pos
+
+        if pos == 0:
+            pos = self.__rawArray__.size
+
+
+        blk_idx = []
+
+        while 1:
+
+            bsize   = self.get_block_size( pos-4 ) 
+
+            blk_idx.insert( 0, ( pos-bsize-4, bsize ) )
+
+            pos     = blk_idx[0][0] - 4 
+
+            if pos <= 0:
+                break
+
+            gtid    = self.__rawArray__[ pos+4:pos+20 ].tostring() 
+
+            if gtid == b'            9010':
+                break
+
+        return blk_idx
 
 
     def __iter__(self):
@@ -231,6 +315,9 @@ class gtFile( __gtConfig__ ):
 
 
     def __next__(self):
+        '''
+        & 2020.06.30: to be modifed to use self.get_block_idx_fwd
+        '''
 
         if self.pos == self.size:
             self.pos    = 0
@@ -244,16 +331,16 @@ class gtFile( __gtConfig__ ):
         DFMT    = self.__rawArray__[pos+596:pos+612].tostring().strip().decode()
 
         # header block
-        blk_idx.append( ( pos+4, self.get_block_len( pos ) ) )
+        blk_idx.append( ( pos+4, self.get_block_size( pos ) ) )
         pos += blk_idx[-1][-1] + 8      # block_length + 8
 
         # scale block
         if DFMT[1:3] in ['RY', 'RX']:       # [UM]R[XY]; ?RX will be deprecated
-            blk_idx.append( ( pos+4, self.get_block_len( pos ) ) )
+            blk_idx.append( ( pos+4, self.get_block_size( pos ) ) )
             pos += blk_idx[-1][-1] + 8  # block_length + 8
 
         # data block
-        blk_idx.append( ( pos+4, self.get_block_len( pos ) ) )
+        blk_idx.append( ( pos+4, self.get_block_size( pos ) ) )
         pos += blk_idx[-1][-1] + 8      # block_length + 8
 
         self.__blk_idx__.append( blk_idx )
@@ -299,14 +386,13 @@ class gtFile( __gtConfig__ ):
 
 
         #headers         = __gtHdr__( headers = headers ).auto_fill( Data, **attrs )
-        headers         = __gtHdr__( headers = headers ).auto_fill( Data, **attrs )
+        headers         = __gtHdr__( headers, attrs ).auto_fill( Data )
 
 
-        #for data, header in map(None, Data, headers):
         for data, header in zip( Data, headers):
 
             chunk       = __gtChunk__( data, header=header )
-            #self.__chunks__.append( chunk )
+            #self.__chunks__.append( chunk )        # cache
 
             varName     = header['ITEM']
 

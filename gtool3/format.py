@@ -61,11 +61,12 @@ class __gtHdrFmt__(object):
 
     def cast( self, k, values ):
 
-        if len( values ) == 1:
+        if len( np.unique( values ) ) == 1:
             return self.fmt[ k ][0]( values[0].strip() )
 
         else:
-            return list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( values ) )
+            return list( self.fmt[ k ][0]( b.strip() ) for b in values )
+            #return list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( values ) )
 
 
     @property

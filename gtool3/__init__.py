@@ -14,6 +14,7 @@ import  os,sys
 from    optparse        import OptionParser
 
 from    .gtool3         import gtFile           as gtopen
+from    .header         import __gtHdr__        as gtheader
 
 
 def main(args,opts):

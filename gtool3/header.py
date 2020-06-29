@@ -12,13 +12,13 @@ from    .format             import __gtHdrFmt__
 
 class __gtHdr__( __gtHdrFmt__ ):
 
-    def __init__(self, headers=None, **kwargs):
+    def __init__( self, headers=None, attrs={} ):
         '''
         headers     None            for new __gtHdr__ instance
                     <memmap>        header array in 1024 bytes length
                     <__gtHdr__>     inherit given __gtHdr__
 
-        kwargs      <dict>          attributes to override default or given __gtHdr__
+        attrs       <dict or odict> attributes to override default or given __gtHdr__
         '''
 
         self.keys   = list( self.fmt.keys() )
@@ -30,10 +30,10 @@ class __gtHdr__( __gtHdrFmt__ ):
             self.dict   = self.default_dict.copy() if headers is None  \
                      else headers.dict.copy()
 
-            kwargs[ "CSIGN" ]   = 'cf.io.gtool %s'%__gtConfig__.version
-            kwargs[ "CDATE" ]   = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
+            attrs[ "CSIGN" ]    = 'cf.io.gtool %s'%__gtConfig__.version
+            attrs[ "CDATE" ]    = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
 
-            self.dict.update( kwargs )
+            self.dict.update( attrs )
 
             self.__headers__    = self.asarray
         # ----------------------------------------------------------------------
@@ -46,21 +46,6 @@ class __gtHdr__( __gtHdrFmt__ ):
                         )
 
         self.curr   = 0
-
-
-    def __getitem__(self,k):
-
-        #ret     = self.asdict[ k ]
-        ret     = self.dict[ k ]
-
-        if ret.shape[0] == 1:
-            return self.fmt[ k ][0]( ret[0].strip() ) 
-
-        else:
-            ret = list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( ret ) )
-
-            return ret  if len( ret ) > 1   \
-              else ret[0]
 
 
     def __len__( self ):
@@ -136,8 +121,9 @@ class __gtHdr__( __gtHdrFmt__ ):
             idx = self.keys.index( k )
             v   = hdict[ k ]
 
-            if not hasattr(v, '__iter__'):  v = [v]
+            #if not hasattr(v, '__iter__'):  v = [v]    # may not need
 
+            print(k,len(v))
             strNote.append( noteFmt%( idx, k, '[%s ... %s]'%(v[0], v[-1]), len(v) ) )
 
         return '\n'+'\n'.join(strOut + strNote)+'\n'
@@ -210,16 +196,16 @@ class __gtHdr__( __gtHdrFmt__ ):
         return header
         
 
-    def auto_fill( self, data, header=None, **kwargs ):
+    def auto_fill( self, data, header=None, attrs={} ):
         '''
         generate header
 
         IN
         ==
-        Data    <nd-array>  data array in rank-4 (T, Z, Y, X)
-        header  <__gtHdr__> gtool3 header instance to inherit
+        Data    <nd-array>      data array in rank-4 (T, Z, Y, X)
+        header  <__gtHdr__>     gtool3 header instance to inherit
 
-        kwargs  <dict>      attributes to override default or given header template
+        attrs   <dict or odict> attributes to override default or given header template
 
         OUT
         ===
@@ -229,20 +215,20 @@ class __gtHdr__( __gtHdrFmt__ ):
         if header is not None:
 
             # for self.iomode == 'r+':
-            kwargs[ "MSIGN" ]   = 'cf.io.gtool %s'%__gtConfig__.version
-            kwargs[ "MDATE" ]   = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
+            attrs[ "MSIGN" ]    = 'cf.io.gtool %s'%__gtConfig__.version
+            attrs[ "MDATE" ]    = datetime.datetime.now().strftime('%Y%m%d %H%M%S')
             # ------------------------
 
         zsize, ysize, xsize = data.shape[-3:]
 
-        kwargs[ 'AEND1' ]   = self['ASTR1'] + xsize - 1
-        kwargs[ 'AEND2' ]   = self['ASTR2'] + ysize - 1
-        kwargs[ 'AEND3' ]   = self['ASTR3'] + zsize - 1
-        kwargs[ 'SIZE'  ]   = zsize * ysize * xsize
+        attrs[ 'AEND1' ]    = self['ASTR1'] + xsize - 1
+        attrs[ 'AEND2' ]    = self['ASTR2'] + ysize - 1
+        attrs[ 'AEND3' ]    = self['ASTR3'] + zsize - 1
+        attrs[ 'SIZE'  ]    = zsize * ysize * xsize
 
-        kwargs[ 'DFMT'  ]   = self.dfmt[ data.itemsize ],
+        attrs[ 'DFMT'  ]    = self.dfmt[ data.itemsize ],
 
-        self.dict.update( kwargs )
+        self.dict.update( attrs )
 
         self.__headers__    = self.asarray
 
