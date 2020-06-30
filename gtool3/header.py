@@ -92,7 +92,6 @@ class __gtHdr__( __gtHdrFmt__ ):
 
         #print( self.__headers__.shape)
         #print( hdict )
-        print(put2note)
 
 
         hdr0        = self.__headers__[0].view( 'S16' ).astype( 'U16' )
@@ -122,8 +121,7 @@ class __gtHdr__( __gtHdrFmt__ ):
             v   = hdict[ k ]
 
             #if not hasattr(v, '__iter__'):  v = [v]    # may not need
-
-            print(k,len(v))
+            #print(k,len(v))
             strNote.append( noteFmt%( idx, k, '[%s ... %s]'%(v[0], v[-1]), len(v) ) )
 
         return '\n'+'\n'.join(strOut + strNote)+'\n'

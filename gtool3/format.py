@@ -62,7 +62,12 @@ class __gtHdrFmt__(object):
     def cast( self, k, values ):
 
         if len( np.unique( values ) ) == 1:
-            return self.fmt[ k ][0]( values[0].strip() )
+            try: 
+                return self.fmt[ k ][0]( values[0].strip() )
+
+            except:
+                print( 'Warning: cannot cast {}:{} to {}, replace with empty string.'.format( k, values, self.fmt[k][0] ) )
+                return ''
 
         else:
             return list( self.fmt[ k ][0]( b.strip() ) for b in values )
