@@ -160,6 +160,8 @@ def main(args,opts):
     testFlag.append( test_modification( outPath )            )
     testFlag.append( test_varwise_decoding( outPath, aSrc )  )
 
+    os.remove( outPath )
+
     print(testFlag)
 
     return all( testFlag )

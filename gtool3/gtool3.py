@@ -165,39 +165,6 @@ class gtFile( __gtConfig__ ):
         self.__version__= __gtConfig__.version
 
 
-    def __getitem__(self, slc):
-
-        if type( slc ) == int:
-
-            pos     = 0
-
-            if slc >= 0:
-
-                for _ in range( slc+1 ):
-                    blk_idx = self.get_block_idx_fwd( pos )
-                    pos     = blk_idx[-1][0] + blk_idx[-1][1] + 4
-
-            else:
-
-                for _ in range( abs(slc) ):
-
-                    blk_idx = self.get_block_idx_bwd( pos )
-                    pos     = blk_idx[0][0] - 4
-
-            return __gtChunk__( self.__rawArray__, blk_idx )
-
-        else:
-
-            return self.chunks[ slc ]
-
-
-    def __len__(self):
-        '''
-        count number of chunks
-        '''
-        return len( self.chunks )
-
-
     @property
     def chunks(self):
         return [ chunk for chunk in self ]
@@ -234,80 +201,35 @@ class gtFile( __gtConfig__ ):
         return OrderedDict( [(k, __gtVar__(v) ) for k,v in list(self.__vars__.items())] )
 
 
-    #def indexing( self ):
-    #    '''
-    #    '''
+    def __getitem__(self, slc):
 
-    #    blk_idx = []            # indices of fortran IO blocks
+        if type( slc ) == int:
 
-    #    pos     = 0
+            pos     = 0
 
-    #    while pos < self.__rawArray__.size:
+            if slc >= 0:
+                for _ in range( slc+1 ):
+                    blk_idx = self.get_block_idx_fwd( pos )
+                    pos     = blk_idx[-1][0] + blk_idx[-1][1] + 4
 
-    #        blk_len = int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+            else:
+                for _ in range( abs(slc) ):
 
-    #        blk_idx.append( [ pos+4, pos+4 + blk_len ] )
+                    blk_idx = self.get_block_idx_bwd( pos )
+                    pos     = blk_idx[0][0] - 4
 
-    #        print( pos+4, blk_len, blk_idx[-1] )
-    #        pos += blk_len + 8
+            return __gtChunk__( self.__rawArray__, blk_idx )
 
-    #    self.__blk_idx__    = blk_idx
+        else:
 
-
-    def get_block_size( self, pos ):
-        return self.__rawArray__[ pos:pos+4 ].view( '>i' )[0]
-        #return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
-
-
-    def get_block_idx_fwd( self, pos ):
-
-        blk_idx = []
-
-        while 1:
-
-            blk_idx.append( ( pos+4, self.get_block_size( pos ) ) )
-
-            pos    += blk_idx[-1][-1] + 8
-
-            if pos >= self.__rawArray__.size:
-                break
-
-            gtid    = self.__rawArray__[ pos+4:pos+20 ].tostring() 
-
-            if gtid == b'            9010':
-                break
-
-        return blk_idx
+            return self.chunks[ slc ]
 
 
-    def get_block_idx_bwd( self, pos ):
-
-        #if pos < 0: 
-        #    pos = self.__rawArray__.size + pos
-
-        if pos == 0:
-            pos = self.__rawArray__.size
-
-
-        blk_idx = []
-
-        while 1:
-
-            bsize   = self.get_block_size( pos-4 ) 
-
-            blk_idx.insert( 0, ( pos-bsize-4, bsize ) )
-
-            pos     = blk_idx[0][0] - 4 
-
-            if pos <= 0:
-                break
-
-            gtid    = self.__rawArray__[ pos+4:pos+20 ].tostring() 
-
-            if gtid == b'            9010':
-                break
-
-        return blk_idx
+    def __len__(self):
+        '''
+        count number of chunks
+        '''
+        return len( self.chunks )
 
 
     def __iter__(self):
@@ -414,6 +336,75 @@ class gtFile( __gtConfig__ ):
             self.__rawArray__[pos:]     = chunk.__rawArray__
 
             # ------------------------------------------------------------------
+
+    #def indexing( self ):
+    #    '''
+    #    '''
+
+    #    blk_idx = []            # indices of fortran IO blocks
+
+    #    pos     = 0
+
+    #    while pos < self.__rawArray__.size:
+
+    #        blk_len = int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+
+    #        blk_idx.append( [ pos+4, pos+4 + blk_len ] )
+
+    #        print( pos+4, blk_len, blk_idx[-1] )
+    #        pos += blk_len + 8
+
+    #    self.__blk_idx__    = blk_idx
+
+
+    def get_block_size( self, pos ):
+        return self.__rawArray__[ pos:pos+4 ].view( '>i' )[0]
+        #return int.from_bytes( self.__rawArray__[ pos:pos+4 ].tostring(), 'big' )
+
+
+    def get_block_idx_fwd( self, pos ):
+
+        blk_idx = []
+
+        while 1:
+            blk_idx.append( ( pos+4, self.get_block_size( pos ) ) )
+
+            pos    += blk_idx[-1][-1] + 8
+            if pos >= self.__rawArray__.size:
+                break
+
+            gtid    = self.__rawArray__[ pos+4:pos+20 ].tostring() 
+            if gtid == b'            9010':
+                break
+
+        return blk_idx
+
+
+    def get_block_idx_bwd( self, pos ):
+
+        #if pos < 0: 
+        #    pos = self.__rawArray__.size + pos
+
+        if pos == 0:
+            pos = self.__rawArray__.size
+
+        blk_idx = []
+
+        while 1:
+            bsize   = self.get_block_size( pos-4 ) 
+            blk_idx.insert( 0, ( pos-bsize-4, bsize ) )
+
+            pos     = blk_idx[0][0] - 4 
+            if pos <= 0:
+                break
+
+            gtid    = self.__rawArray__[ pos+4:pos+20 ].tostring() 
+            if gtid == b'            9010':
+                break
+
+        return blk_idx
+
+
 
 
 #class __gtDim__(gtFile):

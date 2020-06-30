@@ -41,9 +41,7 @@ class __gtChunk__( __gtConfig__ ):
 
 
     def __repr__(self):
-        return '({})'.format( self.data.shape )
-        return self.header.__repr__()
-        return '%s, %s : %s'%(self.item, self.shape, self.dtype)
+        return '__gtChunk__: {} {} {}'.format( self.header['ITEM'], self.data.shape, self.data.dtype )
 
 
     @property
