@@ -70,8 +70,16 @@ class __gtHdrFmt__(object):
                 return ''
 
         else:
-            return list( self.fmt[ k ][0]( b.strip() ) for b in values )
-            #return list( self.fmt[ k ][0]( b.strip() ) for b in np.unique( values ) )
+            l = []
+            for b in values:
+                try:
+                    v = self.fmt[k][0](b.strip())
+                except:
+                    print('Warning: cannot cast {}:{} to {}, replace with empty string.'.format(
+                        k, b, self.fmt[k][0]))
+                    v = ""
+                l.append(v)
+            return l
 
 
     @property
