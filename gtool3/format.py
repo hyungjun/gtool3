@@ -6,6 +6,7 @@ import  numpy               as  np
 
 from    .config             import __gtConfig__
 
+import warnings
 
 class __gtHdrFmt__(object):
     b2s = bytes.decode
@@ -66,7 +67,8 @@ class __gtHdrFmt__(object):
                 return self.fmt[ k ][0]( values[0].strip() )
 
             except:
-                print( 'Warning: cannot cast {}:{} to {}, replace with empty string.'.format( k, values, self.fmt[k][0] ) )
+                warnings.warn('cannot cast {}:{} to {}, replace with empty string.'.format(
+                    k, values, self.fmt[k][0]))
                 return ''
 
         else:
@@ -75,7 +77,7 @@ class __gtHdrFmt__(object):
                 try:
                     v = self.fmt[k][0](b.strip())
                 except:
-                    print('Warning: cannot cast {}:{} to {}, replace with empty string.'.format(
+                    warnings.warn('cannot cast {}:{} to {}, replace with empty string.'.format(
                         k, b, self.fmt[k][0]))
                     v = ""
                 l.append(v)
